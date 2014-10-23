@@ -7,3 +7,12 @@ C:\Users\Chiensi\Documents\Visual Studio 2010\Projects\EnergyPlus\EnergyPlus\bin
 C:\Users\Chiensi\Documents\Visual Studio 2010\Projects\EnergyPlus\EnergyPlus\obj\Debug\EnergyPlus.dll
 C:\Users\Chiensi\Documents\Visual Studio 2010\Projects\EnergyPlus\EnergyPlus\obj\Debug\EnergyPlus.pdb
 C:\Users\Chiensi\Documents\Visual Studio 2010\Projects\EnergyPlus\EnergyPlus\obj\Debug\EnergyPlus.csprojResolveAssemblyReference.cache
+C:\Users\Chiendog\Documents\GitHub\EnergyPlusTextParser\EnergyPlus\obj\Debug\EnergyPlus.csprojResolveAssemblyReference.cache
+C:\Users\Chiendog\Documents\GitHub\EnergyPlusTextParser\EnergyPlus\bin\Debug\EnergyPlus.dll
+C:\Users\Chiendog\Documents\GitHub\EnergyPlusTextParser\EnergyPlus\bin\Debug\EnergyPlus.pdb
+C:\Users\Chiendog\Documents\GitHub\EnergyPlusTextParser\EnergyPlus\bin\Debug\VectorMath.dll
+C:\Users\Chiendog\Documents\GitHub\EnergyPlusTextParser\EnergyPlus\bin\Debug\log4net.dll
+C:\Users\Chiendog\Documents\GitHub\EnergyPlusTextParser\EnergyPlus\bin\Debug\VectorMath.pdb
+C:\Users\Chiendog\Documents\GitHub\EnergyPlusTextParser\EnergyPlus\bin\Debug\log4net.xml
+C:\Users\Chiendog\Documents\GitHub\EnergyPlusTextParser\EnergyPlus\obj\Debug\EnergyPlus.dll
+C:\Users\Chiendog\Documents\GitHub\EnergyPlusTextParser\EnergyPlus\obj\Debug\EnergyPlus.pdb

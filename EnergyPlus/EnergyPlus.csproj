@@ -39,7 +39,7 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="VectorMath">
-      <HintPath>..\..\..\..\..\Desktop\VectorMath\VectorMath\bin\Release\VectorMath.dll</HintPath>
+      <HintPath>..\..\VectorMath\VectorMath\bin\Debug\VectorMath.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
