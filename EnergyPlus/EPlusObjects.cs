@@ -92,6 +92,7 @@ namespace EnergyPlus
             public static string commentStart = "(!-).*";
             //super generic
             public static string Name = @"(?'1'.*)(?'Name'!- Name)";
+            public static string Type = @"(?'1'.*)(?'Type'!- type)";
             public static string semicolon = @"(\S*)(;)(.*)";
             public static string constructionName = @"(?'1'.*)(?'construction'!- Construction Name)";
             public static string typicalVertex = @"(?'1'.*)(?'vertices'!- X,Y,Z)";
@@ -131,7 +132,33 @@ namespace EnergyPlus
             //for ZoneHVAC:LowTemperatureRadiant:SurfaceGroup
             public static string surfaceNumName = @"(?'1'.*)(?'OAMethod'" + TagEndings.LowTempRadiantSurfaceGroupEndings.surfaceNumName + ")";
             public static string surfaceFlowFracNum = @"(?'1'.*)(?'OAMethod'" + TagEndings.LowTempRadiantSurfaceGroupEndings.surfaceFlowFracNum + ")";
-
+            //for schedules
+            public static string startDaySched = "Schedule:Day:Interval,";
+            public static string startWeekSched = "Schedule:Week:Daily,";
+            public static string startYearSched = "Schedule:Year,";
+            public static string daySchedType = @"(?'1'.*)(?'type'!- Schedule Type Limits Name)";
+            public static string interpolTimeStep = @"(?'1'.*)(?'Interp'!- Interpolate to Timestep)";
+            public static string sundaySched = @"(?'1'.*)(?'day'Sunday Schedule:Day Name)";
+            public static string mondaySched = @"(?'1'.*)(?'day'Monday Schedule:Day Name)";
+            public static string tuesdaySched = @"(?'1'.*)(?'day'Tuesday Schedule:Day Name)";
+            public static string wednesdaySched = @"(?'1'.*)(?'day'Wednesday Schedule:Day Name)";
+            public static string thursdaySched = @"(?'1'.*)(?'day'Thursday Schedule:Day Name)";
+            public static string fridaySched = @"(?'1'.*)(?'day'Friday Schedule:Day Name)";
+            public static string saturdaySched = @"(?'1'.*)(?'day'Saturday Schedule:Day Name)";
+            public static string holidaySched = @"(?'1'.*)(?'day'Holiday Schedule:Day Name)";
+            public static string cddSched = @"(?'1'.*)(?'day'CoolingDesignDay Schedule:Day Name)";
+            public static string hddSched = @"(?'1'.*)(?'day'HeatingDesignDay Schedule:Day Name)";
+            public static string custom1Sched = @"(?'1'.*)(?'day'CustomDay1 Schedule:Day Name)";
+            public static string custom2Sched = @"(?'1'.*)(?'day'CustomDay2 Schedule:Day Name)";
+            public static string yearName = @"(?'1'.*)(?'Name'!-Name)";
+            public static string yearType = @"(?'1'.*)(?'type'!-Type)";
+            public static string yearWkSch = @"(?'1'.*)(?'wksch'!-Week Schedule)"; 
+            public static string startMonth = @"(?'1'.*)(?'day'!-Start Month )(?'num'\d)";
+            public static string startDay = @"(?'1'.*)(?'day'!-Start Day )(?'num'\d)";
+            public static string endMonth = @"(?'1'.*)(?'day'!-End Month )(?'num'\d)";
+            public static string endDay = @"(?'1'.*)(?'day'!-End Day )(?'num'\d)";
+            public static string dayschedvals = @"(?'1'.*)(?'comma1',)(?'2'.*)(?'comma2',)";
+            public static string dayschedvalslast = @"(?'1'.*)(?'comma1',)(?'2'.*)(?'semi';)";
         }
         #endregion
         #region
@@ -207,6 +234,87 @@ namespace EnergyPlus
             public int multiplier;
             public int numVertices;
             public double area;
+        }
+
+        public class DayIntervalSchedule
+        {
+            public string Name { get; set; }
+            public string type { get; set; }
+            public string Interpolate { get; set; }
+            public List<List<decimal>> timevals { get; set; }
+
+            public DayIntervalSchedule()
+            {
+                timevals = new List<List<decimal>>();
+            }
+
+        }
+
+        public class WeekIntervalSchedule
+        {
+            public string Name { get; set; }
+            public Dictionary<string, string> dayScheds { get; set; }
+
+            public WeekIntervalSchedule()
+            {
+                dayScheds = new Dictionary<string, string>();
+                dayScheds["Sunday"] = null;
+                dayScheds["Monday"] = null;
+                dayScheds["Tuesday"] = null;
+                dayScheds["Wednesday"] = null;
+                dayScheds["Thursday"] = null;
+                dayScheds["Friday"] = null;
+                dayScheds["Saturday"] = null;
+                dayScheds["Holiday"] = null;
+                dayScheds["cdd"] = null;
+                dayScheds["hdd"] = null;
+                dayScheds["Custom1"] = null;
+                dayScheds["Custom2"] = null;
+
+            }
+        }
+
+        public class YearWeeks
+        {
+            public string wkschname { get; set; }
+            public int startmonth { get; set; }
+            public int startday { get; set; }
+            public int endmonth { get; set; }
+            public int endday { get; set; }
+
+            public YearWeeks(string wknm)
+            {
+                wkschname = wknm;
+                startmonth = 1;
+                startday = 1;
+                endmonth = 12;
+                endday = 31;
+            }
+        }
+
+        public class YearSchedule
+        {
+            public string Name { get; set; }
+            public string type { get; set; }
+            public List<YearWeeks> listofwks { get; set; }
+
+            public YearSchedule()
+            {
+                listofwks = new List<YearWeeks>();
+            }
+        }
+
+        public class EPSchedules
+        {
+            public List<DayIntervalSchedule> epDaySch { get; set; }
+            public List<WeekIntervalSchedule> epWkSch { get; set; }
+            public List<YearSchedule> epYrSch { get; set; }
+            public EPSchedules()
+            {
+                epDaySch = new List<DayIntervalSchedule>();
+                epWkSch = new List<WeekIntervalSchedule>();
+                epYrSch = new List<YearSchedule>();
+            }
         }
     }
         #endregion
@@ -386,6 +494,446 @@ namespace EnergyPlus
 
 
         //Convert file to Object Instances 
+
+        static public EPlusObjects.EPSchedules getEPSchedules(string idfsource)
+        {
+            EPlusObjects.EPSchedules retscheds = new EPlusObjects.EPSchedules();
+            //create your log file writer, that will be used in stream writer at the bottom of this page
+            string log = @"C:\Temp\EPSchedGrabLog.txt";
+            StringBuilder output = new StringBuilder();
+
+            //start with all the regexes you will need
+            //day sched
+            Regex dayschedstart = new Regex(EPlusObjects.EPlusRegexString.startDaySched);
+
+            Regex semicolon = new Regex(EPlusObjects.EPlusRegexString.semicolon);
+
+            Regex weekschstart = new Regex(EPlusObjects.EPlusRegexString.startWeekSched);
+            Regex weekCustom2 = new Regex(EPlusObjects.EPlusRegexString.custom2Sched);
+
+            Regex yearstart = new Regex(EPlusObjects.EPlusRegexString.startYearSched);
+            Regex yearname = new Regex(EPlusObjects.EPlusRegexString.Name);
+            Regex yearType = new Regex(EPlusObjects.EPlusRegexString.yearType);
+            Regex yearWkSch = new Regex(EPlusObjects.EPlusRegexString.yearWkSch);
+            Regex yearstartmonth = new Regex(EPlusObjects.EPlusRegexString.startMonth);
+            Regex yearstartday = new Regex(EPlusObjects.EPlusRegexString.startDay);
+            Regex yearendmonth = new Regex(EPlusObjects.EPlusRegexString.endMonth);
+            Regex yearendday = new Regex(EPlusObjects.EPlusRegexString.endDay);
+
+            Regex dayschedvalsreglast = new Regex(EPlusObjects.EPlusRegexString.dayschedvalslast);
+
+            Encoding encoding;
+            List<string> linestuff = new List<string>();
+            using (StreamReader reader = new StreamReader(idfsource))
+            {
+                string line;
+                encoding = reader.CurrentEncoding;
+                bool dm = false;
+                bool wm = false;
+                bool ym = false;
+                while ((line = reader.ReadLine()) != null)
+                {
+                    MatchCollection daymatch = dayschedstart.Matches(line);
+                    if (daymatch.Count > 0)
+                    {
+                        dm = true;
+                        continue;
+                    }
+                    Match wkmatch = weekschstart.Match(line);
+                    if (wkmatch.Success)
+                    {
+                        wm = true;
+                        continue;
+                    }
+                    Match yrmatch = yearstart.Match(line);
+                    if (yrmatch.Success)
+                    {
+                        ym = true;
+                        continue;
+                    }
+                    if (dm)
+                    {
+                        Match dyvalsend = dayschedvalsreglast.Match(line);
+                        if (dyvalsend.Success)
+                        {
+                            linestuff.Add(line);
+                            retscheds.epDaySch.Add(makeDayIntervalSchedule(linestuff));
+                            linestuff.Clear();
+                            dm = false;
+                            continue;
+                        }
+                        else
+                        {
+                            linestuff.Add(line);
+                            continue;
+                        }
+                    }
+                    if (wm)
+                    {
+                        Match custm2 = weekCustom2.Match(line);
+                        if (custm2.Success)
+                        {
+                            linestuff.Add(line);
+                            retscheds.epWkSch.Add(makeWeekIntervalSchedule(linestuff));
+                            linestuff.Clear();
+                            wm = false;
+                            continue;
+                        }
+                        else
+                        {
+                            linestuff.Add(line);
+                            continue;
+                        }
+                    }
+                    if (ym)
+                    {
+                        Match yrendday = yearendday.Match(line);
+                        if (yrendday.Success)
+                        {
+                            var ret = string.Empty;
+                            Match sc = semicolon.Match(line);
+                            if (sc.Success)
+                            {
+                                linestuff.Add(line);
+                                retscheds.epYrSch.Add(makeYearSchedule(linestuff));
+                                linestuff.Clear();
+                                ym = false;
+                                continue;
+                            }
+                            else
+                            {
+                                linestuff.Add(line);
+                                continue;
+                            }
+                        }
+                        else
+                        {
+                            linestuff.Add(line);
+                            continue;
+                        }
+
+                        
+                    }
+                }
+            }
+            return retscheds;
+        }
+
+        static public EPlusObjects.YearSchedule makeYearSchedule(List<string> stuff)
+        {
+            Regex yearname = new Regex(EPlusObjects.EPlusRegexString.yearName);
+            Regex yearType = new Regex(EPlusObjects.EPlusRegexString.yearType);
+            Regex yearWkSch = new Regex(EPlusObjects.EPlusRegexString.yearWkSch);
+            Regex yearstartmonth = new Regex(EPlusObjects.EPlusRegexString.startMonth);
+            Regex yearstartday = new Regex(EPlusObjects.EPlusRegexString.startDay);
+            Regex yearendmonth = new Regex(EPlusObjects.EPlusRegexString.endMonth);
+            Regex yearendday = new Regex(EPlusObjects.EPlusRegexString.endDay);
+            Regex semicolon = new Regex(EPlusObjects.EPlusRegexString.semicolon);
+            EPlusObjects.YearSchedule yrsch = new EPlusObjects.YearSchedule();
+            int intervalct = 0;
+            List<string> yrWeekStrings = new List<string>();
+
+            foreach (string line in stuff)
+            {
+                Match yrnam = yearname.Match(line);
+                if (yrnam.Success)
+                {
+                    var ret = Purify(yrnam, ",");
+                    if (ret != null) { yrsch.Name = ret; };
+                    continue;
+                }
+                Match yrtype = yearType.Match(line);
+                if (yrtype.Success)
+                {
+                    var ret = Purify(yrtype, ",");
+                    if (ret != null) { yrsch.type = ret; }
+                    continue;
+                }
+                Match wksched = yearWkSch.Match(line);
+                if (wksched.Success)
+                {
+                    var ret = Purify(wksched, ",");
+                    if (ret != null) { yrWeekStrings.Add(ret); }
+                    continue;
+                }
+                Match yrstartmonth = yearstartmonth.Match(line);
+                if (yrstartmonth.Success)
+                {
+                    var ret = Purify(yrstartmonth, ",");
+                    if (ret != null) { yrWeekStrings.Add(ret); }
+                    continue;
+                }
+                Match yrstartday = yearstartday.Match(line);
+                if (yrstartday.Success)
+                {
+                    var ret = Purify(yrstartday, ",");
+                    if (ret != null) { yrWeekStrings.Add(ret); }
+                    continue;
+                }
+                Match yrendmonth = yearendmonth.Match(line);
+                if (yrendmonth.Success)
+                {
+                    var ret = Purify(yrendmonth, ",");
+                    if (ret != null) { yrWeekStrings.Add(ret); }
+                    continue;
+                }
+                Match yrendday = yearendday.Match(line);
+                if (yrendday.Success)
+                {
+                    var ret = string.Empty;
+                    Match sc = semicolon.Match(line);
+                    if (sc.Success)
+                    {
+                        ret = Purify(yrendday, ";");
+                        if (intervalct == 0)
+                        {
+                            string wkname = yrWeekStrings[0];
+                            EPlusObjects.YearWeeks yrWeeks = new EPlusObjects.YearWeeks(wkname);
+                            yrsch.listofwks.Add(yrWeeks); //we know by default with only one interval, that this must be whole year
+                        }
+                    }
+                    else
+                    {
+                        ret = Purify(yrendday, ",");
+                        if (ret != null) { yrWeekStrings.Add(ret); }
+                        yrsch.listofwks.Add(makeYearWeekObject(yrWeekStrings));
+                    }
+                }
+            }
+            return yrsch;
+        }
+
+        static public EPlusObjects.YearWeeks makeYearWeekObject(List<string> yrWeekStrings)
+        {
+            EPlusObjects.YearWeeks week = new EPlusObjects.YearWeeks(yrWeekStrings[0]);
+            week.startmonth = Convert.ToInt16(yrWeekStrings[1]);
+            week.startday = Convert.ToInt16(yrWeekStrings[2]);
+            week.endmonth = Convert.ToInt16(yrWeekStrings[3]);
+            week.endday = Convert.ToInt16(yrWeekStrings[4]);
+
+            return week;
+        }
+
+        static public EPlusObjects.WeekIntervalSchedule makeWeekIntervalSchedule(List<string> stuff)
+        {
+            Regex weekschstart = new Regex(EPlusObjects.EPlusRegexString.startWeekSched);
+            Regex weekName = new Regex(EPlusObjects.EPlusRegexString.Name);
+            Regex weekMonday = new Regex(EPlusObjects.EPlusRegexString.mondaySched);
+            Regex weekTuesday = new Regex(EPlusObjects.EPlusRegexString.tuesdaySched);
+            Regex weekWednesday = new Regex(EPlusObjects.EPlusRegexString.wednesdaySched);
+            Regex weekThursday = new Regex(EPlusObjects.EPlusRegexString.thursdaySched);
+            Regex weekFriday = new Regex(EPlusObjects.EPlusRegexString.fridaySched);
+            Regex weekSaturday = new Regex(EPlusObjects.EPlusRegexString.saturdaySched);
+            Regex weekSunday = new Regex(EPlusObjects.EPlusRegexString.sundaySched);
+            Regex weekHoliday = new Regex(EPlusObjects.EPlusRegexString.holidaySched);
+            Regex weekCDD = new Regex(EPlusObjects.EPlusRegexString.cddSched);
+            Regex weekHDD = new Regex(EPlusObjects.EPlusRegexString.hddSched);
+            Regex weekCustom1 = new Regex(EPlusObjects.EPlusRegexString.custom1Sched);
+            Regex weekCustom2 = new Regex(EPlusObjects.EPlusRegexString.custom2Sched);
+
+            EPlusObjects.WeekIntervalSchedule wsch = new EPlusObjects.WeekIntervalSchedule();
+            foreach (string line in stuff)
+            {
+                Match weekmatch = weekName.Match(line);
+                if (weekmatch.Success)
+                {
+                    var ret = Purify(weekmatch, ",");
+                    if (ret != null) { wsch.Name = ret; }
+                    continue;
+                }
+                Match sundaym = weekSunday.Match(line);
+                if (sundaym.Success)
+                {
+                    var ret = Purify(sundaym, ",");
+                    if (ret != null) { wsch.dayScheds["Sunday"] = ret; }
+                    continue;
+                }
+                Match mondaym = weekMonday.Match(line);
+                if (mondaym.Success)
+                {
+                    var ret = Purify(mondaym, ",");
+                    if (ret != null) { wsch.dayScheds["Monday"] = ret; }
+                    continue;
+                }
+                Match tuesdaym = weekTuesday.Match(line);
+                if (tuesdaym.Success)
+                {
+                    var ret = Purify(tuesdaym, ",");
+                    if (ret != null) { wsch.dayScheds["Tuesday"] = ret; }
+                    continue;
+                }
+                Match wednesdaym = weekWednesday.Match(line);
+                if (wednesdaym.Success)
+                {
+                    var ret = Purify(wednesdaym, ",");
+                    if (ret != null) { wsch.dayScheds["Wednesday"] = ret; }
+                    continue;
+                }
+                Match thursdaym = weekThursday.Match(line);
+                if (thursdaym.Success)
+                {
+                    var ret = Purify(thursdaym, ",");
+                    if (ret != null) { wsch.dayScheds["Thursday"] = ret; }
+                    continue;
+                }
+                Match fridaym = weekFriday.Match(line);
+                if (fridaym.Success)
+                {
+                    var ret = Purify(fridaym, ",");
+                    if (ret != null) { wsch.dayScheds["Friday"] = ret; }
+                    continue;
+                }
+                Match saturdaym = weekSaturday.Match(line);
+                if (saturdaym.Success)
+                {
+                    var ret = Purify(saturdaym, ",");
+                    if (ret != null) { wsch.dayScheds["Saturday"] = ret; }
+                    continue;
+                }
+                Match holidaym = weekHoliday.Match(line);
+                if (holidaym.Success)
+                {
+                    var ret = Purify(holidaym, ",");
+                    if (ret != null) { wsch.dayScheds["Holiday"] = ret; }
+                    continue;
+                }
+                Match cddm = weekCDD.Match(line);
+                if (cddm.Success)
+                {
+                    var ret = Purify(cddm, ",");
+                    if (ret != null) { wsch.dayScheds["cdd"] = ret; }
+                    continue;
+                }
+                Match hddm = weekHDD.Match(line);
+                if (hddm.Success)
+                {
+                    var ret = Purify(hddm, ",");
+                    if (ret != null) { wsch.dayScheds["hdd"] = ret; }
+                    continue;
+                }
+                Match custm1 = weekCustom1.Match(line);
+                if (custm1.Success)
+                {
+                    var ret = Purify(custm1, ",");
+                    if (ret != null) { wsch.dayScheds["Custom1"] = ret; }
+                    continue;
+                }
+                Match custm2 = weekCustom2.Match(line);
+                if (custm2.Success)
+                {
+                    var ret = Purify(custm2, ";");
+                    if (ret != null) { wsch.dayScheds["Custom2"] = ret; }
+                    continue;
+                }
+            }
+            return wsch;
+        }
+        static public EPlusObjects.DayIntervalSchedule makeDayIntervalSchedule(List<string> stuff)
+        {
+            Regex dayschedstart = new Regex(EPlusObjects.EPlusRegexString.startDaySched);
+            Regex dayschedname = new Regex(EPlusObjects.EPlusRegexString.Name);
+            Regex dayschedinterp = new Regex(EPlusObjects.EPlusRegexString.interpolTimeStep);
+            Regex dayschedtype = new Regex(EPlusObjects.EPlusRegexString.daySchedType);
+            Regex semicolon = new Regex(EPlusObjects.EPlusRegexString.semicolon);
+            Regex dayschedvalsreg = new Regex(EPlusObjects.EPlusRegexString.dayschedvals);
+            Regex dayschedvalsreglast = new Regex(EPlusObjects.EPlusRegexString.dayschedvalslast);
+
+            EPlusObjects.DayIntervalSchedule dsint = new EPlusObjects.DayIntervalSchedule();
+            foreach (string line in stuff)
+            {
+                Match name = dayschedname.Match(line);
+                if (name.Success)
+                {
+                    string purify = @"(?'ws'\s*)(?'goods'.*)(?'comma',)";
+                    Regex purifyRegex = new Regex(purify);
+                    Match pure = purifyRegex.Match(name.Groups["1"].Value);
+                    if (pure.Success)
+                    {
+                        dsint.Name = pure.Groups["goods"].Value;
+                        continue;
+                    }
+                }
+                Match schedlimits = dayschedtype.Match(line);
+                if (schedlimits.Success)
+                {
+                    var ret = Purify(schedlimits, ",");
+                    if (ret != null) { dsint.type = ret; }
+                    continue;
+                }
+                Match interpol = dayschedinterp.Match(line);
+                if (interpol.Success)
+                {
+                    var ret = Purify(interpol, ",");
+                    if (ret != null) { dsint.Interpolate = ret; }
+                    continue;
+                }
+                Match dyvals = dayschedvalsreg.Match(line);
+                if (dyvals.Success)
+                {
+                    List<decimal> temp = new List<decimal>();
+                    string eptime = @"(?'hr'\d+)(?'colon':)(?'min'\d+)";
+                    Regex eptimereg = new Regex(eptime);
+                    Match eptimematch = eptimereg.Match(dyvals.Groups["1"].Value.Trim());
+                    if (eptimematch.Success)
+                    {
+                        decimal hr = Convert.ToDecimal(eptimematch.Groups["hr"].Value);
+                        decimal min = Convert.ToDecimal(eptimematch.Groups["min"].Value)/60;
+                        //decimal time = Math.Round(hr + min,2);
+                        decimal time = hr + min;
+                        temp.Add(time);
+                        temp.Add(Convert.ToDecimal(dyvals.Groups["2"].Value.Trim()));
+                        dsint.timevals.Add(temp);
+                    }
+                    continue;
+                }
+                Match dyvalsend = dayschedvalsreglast.Match(line);
+                if (dyvalsend.Success)
+                {
+                    List<decimal> temp = new List<decimal>();
+                    string eptime = @"(?'hr'\d+)(?'colon':)(?'min'\d+)";
+                    Regex eptimereg = new Regex(eptime);
+                    Match eptimematch = eptimereg.Match(dyvalsend.Groups["1"].Value.Trim());
+                    if (eptimematch.Success)
+                    {
+                        decimal hr = Convert.ToDecimal(eptimematch.Groups["hr"].Value);
+                        decimal min = Convert.ToDecimal(eptimematch.Groups["min"].Value) / 60;
+                        //decimal time = Math.Round(hr + min, 2);
+                        decimal time = hr + min;
+                        temp.Add(time);
+                        temp.Add(Convert.ToDecimal(dyvalsend.Groups["2"].Value.Trim()));
+                        dsint.timevals.Add(temp);
+                    }
+                    
+                }
+            }
+            return dsint;
+        }
+
+        static public string Purify(Match line, string delimiter)
+        {
+            if (delimiter == ",")
+            {
+                string purify = @"(?'ws'\s*)(?'goods'.*)(?'comma',)";
+                Regex purifyRegex = new Regex(purify);
+                Match pure = purifyRegex.Match(line.Groups["1"].Value);
+                if (pure.Success)
+                {
+                    return pure.Groups["goods"].Value;
+                }
+            }
+            else if (delimiter == ";")
+            {
+                string purify = @"(?'ws'\s*)(?'goods'.*)(?'semicolon';)";
+                Regex purifyRegex = new Regex(purify);
+                Match pure = purifyRegex.Match(line.Groups["1"].Value);
+                if (pure.Success)
+                {
+                    return pure.Groups["goods"].Value;
+                }
+            }
+            return null;
+        }
+
         static public ModelingUtilities.BuildingObjects.Surface EPlusSurfacetoObject(string sourcefile)
         {
             //create your log file writer, that will be used in stream writer at the bottom of this page
@@ -8113,3 +8661,4 @@ List<Vector.MemorySafe_CartCoord> newCoords, StringBuilder output, int windowCou
 
                         #endregion    
 
+               
