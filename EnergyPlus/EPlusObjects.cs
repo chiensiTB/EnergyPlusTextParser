@@ -19,6 +19,87 @@ namespace EnergyPlus
             public string zoneListName;
         }
 
+        public class EPlusConstructions
+        {
+            public List<EPlusMaterials> epMaterials { get; set; }
+            public List<EPlusOpaqueConst> epOpaque {get;set;}
+            public List<EPlusGlazingConst> epGlazing {get;set;}
+            public List<EPlusGlazing> epGlazingLayers { get; set; }
+            public List<EPlusGas> epGasLayers { get; set; }
+
+            public EPlusConstructions()
+            {
+                epMaterials = new List<EPlusMaterials>();
+                epOpaque = new List<EPlusOpaqueConst>();
+                epGlazing = new List<EPlusGlazingConst>();
+                epGlazingLayers = new List<EPlusGlazing>();
+                epGasLayers = new List<EPlusGas>();
+            }
+
+        }
+
+        public class EPlusMaterials
+        {
+            public string name { get; set; }
+            public string roughness { get; set; }
+            public decimal thickness { get; set; }
+            public decimal conductivity { get; set; }
+            public decimal density { get; set; }
+            public decimal spht { get; set; }
+            public decimal thermabs { get; set; }
+            public decimal solarabs { get; set; }
+            public decimal visabs { get; set; }
+        }
+
+        public class EPlusOpaqueConst
+        {
+            public string name {get;set;}
+            public List<string> layernames {get;set;}
+
+            public EPlusOpaqueConst()
+            {
+                layernames = new List<string>();
+            }
+        }
+
+        public class EPlusGlazingConst
+        {
+            public string name {get;set;}
+            public List<string> glazingLayers {get;set;}
+            public List<string> gasLayers {get;set;}
+
+            public EPlusGlazingConst()
+            {
+                glazingLayers = new List<string>();
+                gasLayers = new List<string>();
+            }
+        }
+
+        public class EPlusGlazing
+        {
+            public string name {get;set;}
+            public string opticalDataType {get;set;}
+            public decimal thickness {get;set;}
+            public decimal solarTransmittance {get;set;}
+            public decimal solarReflectanceBack {get;set;}
+            public decimal solarReflectanceFront {get;set;}
+            public decimal visibleTransmittance {get;set;}
+            public decimal visibleReflectanceFront {get;set;}
+            public decimal visibleReflectanceBack {get;set;}
+            public decimal IRTransmittance {get;set;}
+            public decimal IREmittanceBack {get;set;}
+            public decimal IREmittanceFront {get;set;}
+            public decimal conductivity { get; set; }
+
+        }
+
+        public class EPlusGas
+        {
+            public string name {get;set;}
+            public decimal thickness {get;set;}
+            public string gastype {get;set;}
+        }
+
         public class ZoneList
         {
             public List<string> zoneListNames;
@@ -159,6 +240,44 @@ namespace EnergyPlus
             public static string endDay = @"(?'1'.*)(?'day'!-End Day )(?'num'\d)";
             public static string dayschedvals = @"(?'1'.*)(?'comma1',)(?'2'.*)(?'comma2',)";
             public static string dayschedvalslast = @"(?'1'.*)(?'comma1',)(?'2'.*)(?'semi';)";
+
+            //for construction definitions
+            public static string ADconstructionDef = @"CONSTRUCTION,";
+            public static string ADconstructionName = @"(?'name'.*)(?'comma1',)";
+            public static string ADconstructionLayer = @"! Layer";
+            public static string ADwindowGlazing = @"WindowMaterial:Glazing,";
+            public static string ADName = @"(?'1'.*)(?'name'! Name)";
+            public static string ADwindowConstruction = @"(?'1'.*)(window)(?'1'.*)";
+            public static string ADopticaldata = @"(?'1'.*)(?'optical'! Optical Data Type)";
+            public static string ADglazingthickness = @"(?'1'.*)(?'thickness'! Thickness)";
+            public static string ADwindsolartrans = @"(?'1'.*)(?'solartrans'! Solar Transmittance)";
+            public static string ADwindsolarrefback = @"(?'1'.*)(?'solarrefback'! Solar Reflectance Back)";
+            public static string ADwindsolarreffront = @"(?'1'.*)(?'solarreffront'! Solar Reflectance Front)";
+            public static string ADwindvisibletrans = @"(?'1'.*)(?'visbletrans'! Visible Transmittance)";
+            public static string ADwindvisiblerefback = @"(?'1'.*)(?'visiblerefback'! Visible Reflectance Back)";
+            public static string ADwindvisiblereffront = @"(?'1'.*)(?'visiblereffront'! Visible Reflectance Front)";
+            public static string ADwindIRtrans = @"(?'1'.*)(?'IRtrans'! IR Transmittance)";
+            public static string ADwindIRemback = @"(?'1'.*)(?'IRrefback'! IR Emittance Front)";
+            public static string ADwindIRemfront = @"(?'1'.*)(?'IRreffront'! IR Emittance Back)";
+            public static string ADwindconductivity = @"(?'1'.*)(?'conductivity'! Conductivity)";
+            public static string ADwindowGas = @"WindowMaterial:Gas";
+            public static string ADgasType = @"(?'1'.*)(?'gastype'! Gas Type)";
+
+            //material definitions
+            public static string ADmaterial = @"(?'1'\s*)(?'material'MATERIAL,)(?'2'.*)";
+            public static string ADmatThermalResistance = @"(?'1'.*)(?''! Resistance {m2-K/w})";
+            public static string ADmaterialNoMass = @"(?'1'\s*)(?'material'MATERIAL:NoMass,)(?'2'.*)";
+            public static string ADmaterialAirGap = @"(?'1'\s*)(?'material'MATERIAL:AirGap,)(?'2'.*)";
+            public static string ADmaterialroughness = @"(?'1'.*)(?'roughness'!-Roughness)";
+            public static string ADmaterialthickness = @"(?'1'.*)(?'thickness'! Thickness \(m\))";
+            public static string ADmaterialconductivity = @"(?'1'.*)(?'conductivity'! Conductivity {W/m-K})";
+            public static string ADmaterialdensity = @"(?'1'.*)(?'density'! Density \(kg/m3\))";
+            public static string ADspecificheat = @"(?'1'.*)(?'spht'! Specific Heat \(J/kgK\))";
+            public static string ADthermabs = @"(?'1'.*)(?'thermabs'! Thermal Absorptance)";
+            public static string ADsolabs = @"(?'1'.*)(?'solabs'! Solar Absorptance)";
+            public static string ADvisabs = @"(?'1'.*)(?'visabs'! Visible Absorptance)";
+
+
         }
         #endregion
         #region
@@ -492,8 +611,497 @@ namespace EnergyPlus
             return emptySurface;
         }
 
+        private static EPlusObjects.EPlusGlazingConst makeWindowConstruction(List<string> linestuff)
+        {
+            Regex scfound = new Regex(EPlusObjects.EPlusRegexString.semicolon);
+            EPlusObjects.EPlusGlazingConst retwindow = new EPlusObjects.EPlusGlazingConst();
+
+            for (int line = 0; line < linestuff.Count; line++)
+            {
+                if (line == 0)
+                {
+                    string purify = @"(?'ws'\s*)(?'goods'.*)(?'comma',)";
+                    Regex purifyRegex = new Regex(purify);
+                    Match pure = purifyRegex.Match(linestuff[line]);
+                    if (pure.Success)
+                    {
+                        retwindow.name = pure.Groups[2].Value.Trim();
+                        continue;
+                    }
+                }
+                Match semicolon = scfound.Match(linestuff[line]);
+                if (semicolon.Success)
+                {
+                    if (line % 2 == 1)
+                    {
+                        string purify = @"(?'ws'\s*)(?'goods'.*)(?'semicolon';)";
+                        Regex purifyRegex = new Regex(purify);
+                        Match pure = purifyRegex.Match(linestuff[line]);
+                        if (pure.Success)
+                        {
+                            retwindow.glazingLayers.Add(pure.Groups[2].Value.Trim());
+                        }
+                    }
+                    if (line % 2 == 0)
+                    {
+                        string purify = @"(?'ws'\s*)(?'goods'.*)(?'semicolon';)";
+                        Regex purifyRegex = new Regex(purify);
+                        Match pure = purifyRegex.Match(linestuff[line]);
+                        if (pure.Success)
+                        {
+                            retwindow.gasLayers.Add(pure.Groups[2].Value.Trim());
+                        }
+                    }
+                }
+                else
+                {
+                    if (line % 2 == 1)
+                    {
+                        string purify = @"(?'ws'\s*)(?'goods'.*)(?'comma',)";
+                        Regex purifyRegex = new Regex(purify);
+                        Match pure = purifyRegex.Match(linestuff[line]);
+                        if (pure.Success)
+                        {
+                            retwindow.glazingLayers.Add(pure.Groups[2].Value.Trim());
+                        }
+                    }
+                    if (line % 2 == 0)
+                    {
+                        string purify = @"(?'ws'\s*)(?'goods'.*)(?'comma',)";
+                        Regex purifyRegex = new Regex(purify);
+                        Match pure = purifyRegex.Match(linestuff[line]);
+                        if (pure.Success)
+                        {
+                            retwindow.gasLayers.Add(pure.Groups[2].Value.Trim());
+                        }
+                    }
+                }
+            }
+            return retwindow;
+        }
+
+        private static EPlusObjects.EPlusOpaqueConst makeOpaqueConstruction(List<string> linestuff)
+        {
+            Regex semicolon = new Regex(EPlusObjects.EPlusRegexString.semicolon);
+            EPlusObjects.EPlusOpaqueConst retconst = new EPlusObjects.EPlusOpaqueConst();
+            for (int line = 0; line < linestuff.Count; line++)
+            {
+                if (line == 0)
+                {
+                    string purify = @"(?'ws'\s*)(?'goods'.*)(?'comma',)";
+                    Regex purifyRegex = new Regex(purify);
+                    Match pure = purifyRegex.Match(linestuff[line]);
+                    if (pure.Success)
+                    {
+                        retconst.name = pure.Groups[2].Value.Trim();
+                    }
+                }
+                else
+                {
+                    Match semimatch = semicolon.Match(linestuff[line]);
+                    string purify = "";
+                    if (semimatch.Success)
+                    {
+                        purify = @"(?'ws'\s*)(?'goods'.*)(?'semic';)";
+                    }
+                    else
+                    {
+                        purify = @"(?'ws'\s*)(?'goods'.*)(?'comma',)";
+                    }
+                    Regex purifyRegex = new Regex(purify);
+                    Match pure = purifyRegex.Match(linestuff[line]);
+                    if (pure.Success)
+                    {
+                        retconst.layernames.Add(pure.Groups[2].Value.Trim());
+                    }
+                }
+            }
+            return retconst;
+        }
+
+        public static EPlusObjects.EPlusGlazing makeGlazingLayer(List<string> linestuff)
+        {
+            EPlusObjects.EPlusGlazing retglaz = new EPlusObjects.EPlusGlazing();
+            Regex windowMaterialGlazing = new Regex(EPlusObjects.EPlusRegexString.ADwindowGlazing);
+            Regex windowMaterialName = new Regex(EPlusObjects.EPlusRegexString.ADName);
+            Regex opticalData = new Regex(EPlusObjects.EPlusRegexString.ADopticaldata);
+            Regex thickness = new Regex(EPlusObjects.EPlusRegexString.ADglazingthickness);
+            Regex visTrans = new Regex(EPlusObjects.EPlusRegexString.ADwindvisibletrans);
+            Regex visReflBack = new Regex(EPlusObjects.EPlusRegexString.ADwindvisiblerefback);
+            Regex visReflFront = new Regex(EPlusObjects.EPlusRegexString.ADwindvisiblereffront);
+            Regex solTrans = new Regex(EPlusObjects.EPlusRegexString.ADwindsolartrans);
+            Regex solReflBack = new Regex(EPlusObjects.EPlusRegexString.ADwindsolarrefback);
+            Regex solReflFront = new Regex(EPlusObjects.EPlusRegexString.ADwindsolarreffront);
+            Regex IRTrans = new Regex(EPlusObjects.EPlusRegexString.ADwindIRtrans);
+            Regex IREmBack = new Regex(EPlusObjects.EPlusRegexString.ADwindIRemback);
+            Regex IREMFront = new Regex(EPlusObjects.EPlusRegexString.ADwindIRemfront);
+            Regex cond = new Regex(EPlusObjects.EPlusRegexString.ADwindconductivity);
+            Regex semicolonReg = new Regex(EPlusObjects.EPlusRegexString.semicolon);
+            
+            for(int linecount = 0; linecount < linestuff.Count; linecount++)
+            {
+                if (linecount == 0)
+                {
+                    Match namematch = windowMaterialName.Match(linestuff[linecount]);
+                    if (namematch.Success)
+                    {
+                        retglaz.name = Purify(namematch, ",");
+                        continue;
+                    }
+                }
+                else
+                {
+                    Match opticalMatch = opticalData.Match(linestuff[linecount]);
+                    if (opticalMatch.Success)
+                    {
+                        retglaz.opticalDataType = Purify(opticalMatch, ",");
+                        continue;
+                    }
+
+                    Match thckmatch = thickness.Match(linestuff[linecount]);
+                    if (thckmatch.Success)
+                    {
+                        retglaz.thickness = Convert.ToDecimal(Purify(thckmatch, ","));
+                        continue;
+                    }
+                    Match stmatch = solTrans.Match(linestuff[linecount]);
+                    if (stmatch.Success)
+                    {
+                        retglaz.solarTransmittance = Convert.ToDecimal(Purify(stmatch, ","));
+                        continue;
+                    }
+                    Match srfmatch = solReflFront.Match(linestuff[linecount]);
+                    if (srfmatch.Success)
+                    {
+                        retglaz.solarReflectanceFront = Convert.ToDecimal(Purify(srfmatch,","));
+                        continue;
+                    }
+                    Match srbmatch = solReflBack.Match(linestuff[linecount]);
+                    if (srbmatch.Success)
+                    {
+                        retglaz.solarReflectanceBack = Convert.ToDecimal(Purify(srbmatch,","));
+                        continue;
+                    }
+                    Match vltmatch = visTrans.Match(linestuff[linecount]);
+                    if(vltmatch.Success)
+                    {
+                        retglaz.visibleTransmittance = Convert.ToDecimal(Purify(vltmatch,","));
+                        continue;
+                    }
+                    Match vrfmatch = visReflFront.Match(linestuff[linecount]);
+                    if (vrfmatch.Success)
+                    {
+                        retglaz.visibleReflectanceFront = Convert.ToDecimal(Purify(vrfmatch,","));
+                        continue;
+                    }
+                    Match vrbmatch = visReflBack.Match(linestuff[linecount]);
+                    if (vrbmatch.Success)
+                    {
+                        retglaz.visibleReflectanceBack = Convert.ToDecimal(Purify(vrbmatch, ","));
+                        continue;
+                    }
+                    Match irtmatch = IRTrans.Match(linestuff[linecount]);
+                    if (irtmatch.Success)
+                    {
+                        retglaz.IRTransmittance = Convert.ToDecimal(Purify(irtmatch,","));
+                        continue;
+                    }
+                    Match irefmatch = IREMFront.Match(linestuff[linecount]);
+                    if (irefmatch.Success)
+                    {
+                        retglaz.IREmittanceFront = Convert.ToDecimal(Purify(irefmatch,","));
+                        continue;
+                    }
+                    Match irebmatch = IREmBack.Match(linestuff[linecount]);
+                    if (irebmatch.Success)
+                    {
+                        retglaz.IREmittanceBack = Convert.ToDecimal(Purify(irebmatch,","));
+                        continue;
+                    }
+                    Match condmatch = cond.Match(linestuff[linecount]);
+                    if (condmatch.Success)
+                    {
+                        retglaz.conductivity = Convert.ToDecimal(Purify(condmatch, ";"));
+                        continue;
+                    }
+                }
+            }
+            return retglaz;
+        }
+
+        public static EPlusObjects.EPlusGas makeGasLayer(List<string> linestuff)
+        {
+            EPlusObjects.EPlusGas retgas = new EPlusObjects.EPlusGas();
+            Regex windowMaterialName = new Regex(EPlusObjects.EPlusRegexString.ADName);
+            Regex thickness = new Regex(EPlusObjects.EPlusRegexString.ADglazingthickness);
+            Regex gastype = new Regex(EPlusObjects.EPlusRegexString.ADgasType);
+
+            for (int lnct = 0; lnct < linestuff.Count; lnct++)
+            {
+                Match nmatch = windowMaterialName.Match(linestuff[lnct]);
+                if (nmatch.Success)
+                {
+                    retgas.name = Purify(nmatch, ",");
+                    continue;
+                }
+                Match gasmatch = gastype.Match(linestuff[lnct]);
+                if (gasmatch.Success)
+                {
+                    retgas.gastype = Purify(gasmatch, ",");
+                }
+                Match thickmatch = thickness.Match(linestuff[lnct]);
+                if (thickmatch.Success)
+                {
+                    retgas.thickness = Convert.ToDecimal(Purify(thickmatch, ";"));
+                    continue;
+                }
+
+            }
+            return retgas;
+        }
+
+        public static EPlusObjects.EPlusMaterials makeMaterial(List<string> linestuff)
+        {
+            Regex namereg = new Regex(EPlusObjects.EPlusRegexString.ADName);
+            Regex rufreg = new Regex(EPlusObjects.EPlusRegexString.ADmaterialroughness);
+            Regex thckreg = new Regex(EPlusObjects.EPlusRegexString.ADmaterialthickness);
+            Regex condreg = new Regex(EPlusObjects.EPlusRegexString.ADmaterialconductivity);
+            Regex densreg = new Regex(EPlusObjects.EPlusRegexString.ADmaterialdensity);
+            Regex spehtreg = new Regex(EPlusObjects.EPlusRegexString.ADspecificheat);
+            Regex solabs = new Regex(EPlusObjects.EPlusRegexString.ADsolabs);
+            Regex visabs = new Regex(EPlusObjects.EPlusRegexString.ADvisabs);
+            Regex thermabs = new Regex(EPlusObjects.EPlusRegexString.ADthermabs);
+
+            EPlusObjects.EPlusMaterials retmat = new EPlusObjects.EPlusMaterials();
+            for (int lnct = 0; lnct < linestuff.Count; lnct++)
+            {
+                Match nmmtch = namereg.Match(linestuff[lnct]);
+                if (nmmtch.Success)
+                {
+                    retmat.name = Purify(nmmtch, ",");
+                    continue;
+                }
+                Match rufmtch = rufreg.Match(linestuff[lnct]);
+                if (rufmtch.Success)
+                {
+                    retmat.roughness = Purify(rufmtch,",");
+                    continue;
+                }
+                Match thkm = thckreg.Match(linestuff[lnct]);
+                if (thkm.Success)
+                {
+                    retmat.thickness = Convert.ToDecimal(Purify(thkm,","));
+                    continue;
+                }
+                Match condmatch = condreg.Match(linestuff[lnct]);
+                if (condmatch.Success)
+                {
+                    retmat.conductivity = Convert.ToDecimal(Purify(condmatch,","));
+                    continue;
+                }
+                Match pmatch = densreg.Match(linestuff[lnct]);
+                if (pmatch.Success)
+                {
+                    retmat.density = Convert.ToDecimal(Purify(pmatch,","));
+                    continue;
+                }
+                Match cpmatch = spehtreg.Match(linestuff[lnct]);
+                if (cpmatch.Success)
+                {
+                    retmat.spht = Convert.ToDecimal(Purify(cpmatch,","));
+                    continue;
+                }
+                Match thermabsm = thermabs.Match(linestuff[lnct]);
+                if (thermabsm.Success)
+                {
+                    retmat.thermabs = Convert.ToDecimal(Purify(thermabsm, ","));
+                    continue;
+                }
+                Match solabsm = solabs.Match(linestuff[lnct]);
+                if (solabsm.Success)
+                {
+                    retmat.solarabs = Convert.ToDecimal(Purify(solabsm,","));
+                    continue;
+                }
+                Match visabsm = visabs.Match(linestuff[lnct]);
+                if (visabsm.Success)
+                {
+                    retmat.visabs = Convert.ToDecimal(Purify(visabsm,";"));
+                    continue;
+                }
+            }
+            return retmat;
+        }
 
         //Convert file to Object Instances 
+        public static EPlusObjects.EPlusConstructions getAllEPConstructions(string idfsource)
+        {
+            
+            //create your log file writer, that will be used in stream writer at the bottom of this page
+            string log = @"C:\Temp\EPSchedGrabLog.txt";
+            StringBuilder output = new StringBuilder();
+
+            //start with all the regexes you will need
+            Regex materialStart = new Regex(EPlusObjects.EPlusRegexString.ADmaterial);
+            Regex materialStart2 = new Regex(EPlusObjects.EPlusRegexString.ADmaterialNoMass);
+            Regex materialStart3 = new Regex(EPlusObjects.EPlusRegexString.ADmaterialAirGap);
+            Regex constructionstart = new Regex(EPlusObjects.EPlusRegexString.ADconstructionDef);
+            Regex constName = new Regex(EPlusObjects.EPlusRegexString.ADconstructionName);
+            Regex constLayer = new Regex(EPlusObjects.EPlusRegexString.ADconstructionLayer);
+            Regex windowConstFind = new Regex(EPlusObjects.EPlusRegexString.ADwindowConstruction);
+            Regex windowMaterialGlazing = new Regex(EPlusObjects.EPlusRegexString.ADwindowGlazing);
+            Regex windowMaterialGas = new Regex(EPlusObjects.EPlusRegexString.ADwindowGas);
+            Regex opticalData = new Regex(EPlusObjects.EPlusRegexString.ADopticaldata);
+            Regex thickness = new Regex(EPlusObjects.EPlusRegexString.ADglazingthickness);
+            Regex visTrans = new Regex(EPlusObjects.EPlusRegexString.ADwindvisibletrans);
+            Regex visReflBack = new Regex(EPlusObjects.EPlusRegexString.ADwindvisiblerefback);
+            Regex visReflFront = new Regex(EPlusObjects.EPlusRegexString.ADwindvisiblereffront);
+            Regex solTrans = new Regex(EPlusObjects.EPlusRegexString.ADwindsolartrans);
+            Regex solReflBack = new Regex(EPlusObjects.EPlusRegexString.ADwindsolarrefback);
+            Regex solReflFront = new Regex(EPlusObjects.EPlusRegexString.ADwindsolarreffront);
+            Regex IRTrans = new Regex(EPlusObjects.EPlusRegexString.ADwindIRtrans);
+            Regex IRReflBack = new Regex(EPlusObjects.EPlusRegexString.ADwindIRemback);
+            Regex IRReflFront = new Regex(EPlusObjects.EPlusRegexString.ADwindIRemfront);
+            Regex semicolonReg = new Regex(EPlusObjects.EPlusRegexString.semicolon);
+
+            List<EPlusObjects.EPlusGlazingConst> epglazecon = new List<EPlusObjects.EPlusGlazingConst>();
+            List<EPlusObjects.EPlusOpaqueConst> epopaque = new List<EPlusObjects.EPlusOpaqueConst>();
+            EPlusObjects.EPlusConstructions epconst = new EPlusObjects.EPlusConstructions();
+
+            Encoding encoding;
+            List<string> linestuff = new List<string>();
+            using (StreamReader reader = new StreamReader(idfsource))
+            {
+                string line;
+                encoding = reader.CurrentEncoding;
+                //construction parsing
+                //name (if it has window in it, move to opaque solution) else glazing solution
+                //opaque solution ...just take names through the semicolon (look for layers as a luxury)
+                //window solution... call for each type and place it in the instance
+                //initialize the values to collect and return
+                bool foundMaterial = false;
+                bool foundConstruction = false;
+                bool foundGlazedConstruction = false;
+                bool foundGlazingMaterial = false;
+                bool foundGasMaterial = false;
+                int linect = 0;
+                while ((line = reader.ReadLine()) != null)
+                {
+                    //find the material start
+                    Match matstart = materialStart.Match(line);
+                    Match matstart2 = materialStart2.Match(line);
+                    Match matstart3 = materialStart3.Match(line);
+                    if (matstart.Success || matstart2.Success || matstart3.Success)
+                    {
+                        foundMaterial = true;
+                        continue;
+                    }
+                    //find the construction start
+                    Match constrStart = constructionstart.Match(line);
+                    if (constrStart.Success)
+                    {
+                        foundConstruction = true;
+                        continue;
+                    }
+                    Match glazingMaterial = windowMaterialGlazing.Match(line);
+                    if (glazingMaterial.Success)
+                    {
+                        foundGlazingMaterial = true;
+                        continue;
+                    }
+                    Match gasMaterial = windowMaterialGas.Match(line);
+                    if (gasMaterial.Success)
+                    {
+                        foundGasMaterial = true;
+                        continue;
+                    }
+                    #region
+                    if (foundMaterial)
+                    {
+                        linestuff.Add(line);
+                        Match semic = semicolonReg.Match(line);
+                        if (semic.Success)
+                        {
+                            epconst.epMaterials.Add(makeMaterial(linestuff));
+                            linestuff.Clear();
+                            foundMaterial = false;
+                            continue;
+                        }
+                    }
+                    if (foundConstruction)
+                    {
+                        //identify if the construction is a window or opaque
+                        //Window?
+                        if (!foundGlazedConstruction)
+                        {
+                            Match window = windowConstFind.Match(line);
+                            if (window.Success)
+                            {
+                                foundGlazedConstruction = true;
+                                linestuff.Add(line);
+                                continue;
+                            }
+                        }
+                        //the control flow for windows is a little unusual because of the way that we have to search.
+                        if (foundGlazedConstruction == true)
+                        {
+                            linestuff.Add(line);
+                            Match semicolon = semicolonReg.Match(line);
+                            if (semicolon.Success)
+                            {
+                                epconst.epGlazing.Add(makeWindowConstruction(linestuff));
+                                linestuff.Clear();
+                                foundConstruction = false;
+                                foundGlazedConstruction = false;
+                                continue;
+                            }
+                        }
+                        else
+                        {
+                            //it is safe (at least we think, to assume this is an opaque surface)
+                            linestuff.Add(line);
+                            Match semicolon = semicolonReg.Match(line);
+                            if (semicolon.Success)
+                            {
+                                epconst.epOpaque.Add(makeOpaqueConstruction(linestuff));
+                                linestuff.Clear();
+                                foundConstruction = false;
+                                continue;
+                            }
+                        }
+                        
+                    }
+                    #endregion
+                    if (foundGlazingMaterial)
+                    {
+                        linestuff.Add(line);
+                        Match semicolon = semicolonReg.Match(line);
+                        if (semicolon.Success)
+                        {
+                            epconst.epGlazingLayers.Add(makeGlazingLayer(linestuff));
+                            linestuff.Clear();
+                            foundGlazingMaterial = false;
+                            continue;
+                        }
+                    }
+                    if (foundGasMaterial)
+                    {
+                        linestuff.Add(line);
+                        Match semicolon = semicolonReg.Match(line);
+                        if (semicolon.Success)
+                        {
+                            epconst.epGasLayers.Add(makeGasLayer(linestuff));
+                            linestuff.Clear();
+                            foundGasMaterial = false;
+                            continue;
+                        }
+                    }
+                    linect++;
+                }
+            }
+            return epconst;
+        }
+
 
         static public EPlusObjects.EPSchedules getEPSchedules(string idfsource)
         {
