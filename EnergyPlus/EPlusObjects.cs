@@ -49,6 +49,7 @@ namespace EnergyPlus
             public decimal thermabs { get; set; }
             public decimal solarabs { get; set; }
             public decimal visabs { get; set; }
+            public decimal resistance { get; set; }
         }
 
         public class EPlusOpaqueConst
@@ -265,7 +266,7 @@ namespace EnergyPlus
 
             //material definitions
             public static string ADmaterial = @"(?'1'\s*)(?'material'MATERIAL,)(?'2'.*)";
-            public static string ADmatThermalResistance = @"(?'1'.*)(?''! Resistance {m2-K/w})";
+            public static string ADmatThermalResistance = @"(?'1'.*)(?'resistance'! Resistance {m2-K/w})";
             public static string ADmaterialNoMass = @"(?'1'\s*)(?'material'MATERIAL:NoMass,)(?'2'.*)";
             public static string ADmaterialAirGap = @"(?'1'\s*)(?'material'MATERIAL:AirGap,)(?'2'.*)";
             public static string ADmaterialroughness = @"(?'1'.*)(?'roughness'!-Roughness)";
@@ -863,6 +864,7 @@ namespace EnergyPlus
         public static EPlusObjects.EPlusMaterials makeMaterial(List<string> linestuff)
         {
             Regex namereg = new Regex(EPlusObjects.EPlusRegexString.ADName);
+            Regex resreg = new Regex(EPlusObjects.EPlusRegexString.ADmatThermalResistance);
             Regex rufreg = new Regex(EPlusObjects.EPlusRegexString.ADmaterialroughness);
             Regex thckreg = new Regex(EPlusObjects.EPlusRegexString.ADmaterialthickness);
             Regex condreg = new Regex(EPlusObjects.EPlusRegexString.ADmaterialconductivity);
@@ -928,6 +930,11 @@ namespace EnergyPlus
                 {
                     retmat.visabs = Convert.ToDecimal(Purify(visabsm,";"));
                     continue;
+                }
+                Match resmat = resreg.Match(linestuff[lnct]);
+                if (resmat.Success)
+                {
+                    retmat.resistance = Convert.ToDecimal(Purify(resmat, ";"));
                 }
             }
             return retmat;
