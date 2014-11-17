@@ -15,3 +15,4 @@ C:\Users\Chiendog\Documents\GitHub\EnergyPlusTextParser\EnergyPlus\bin\Debug\Vec
 C:\Users\Chiendog\Documents\GitHub\EnergyPlusTextParser\EnergyPlus\bin\Debug\log4net.xml
 C:\Users\Chiendog\Documents\GitHub\EnergyPlusTextParser\EnergyPlus\obj\Debug\EnergyPlus.dll
 C:\Users\Chiendog\Documents\GitHub\EnergyPlusTextParser\EnergyPlus\obj\Debug\EnergyPlus.pdb
+C:\Users\Chiendog\Documents\GitHub\EnergyPlusTextParser\EnergyPlus\obj\Debug\EnergyPlus.csprojResolveAssemblyReference.cache

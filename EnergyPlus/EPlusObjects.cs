@@ -179,6 +179,13 @@ namespace EnergyPlus
             public static string constructionName = @"(?'1'.*)(?'construction'!- Construction Name)";
             public static string typicalVertex = @"(?'1'.*)(?'vertices'!- X,Y,Z)";
 
+            //zones
+            public static string ADzoneStart = "ZONE,";
+            public static string ADzoneName = @"(?'1'.*)(?'zoneName'!Zone name)";
+            public static string ADzoneMultiplier = @"(?'1'.*)(?'zoneMult'! Zone Multiplier)";
+            public static string ADzoneVol = @"(?'1'.*)(?'zoneVol'! Zone Volume {m\*\*3})";
+            public static string ADzoneArea = @"(?'1'.*)(?'zoneArea'! Floor area {m2})";
+
             //detailed surfaces
             public static string surfaceType = @"(?'1'.*)(?'surfaceType'!- Surface Type)";
             public static string outsideBoundaryName = @"(?'1'.*)(?'outsideBoundaryName'!- Outside Boundary Condition)";
@@ -241,6 +248,11 @@ namespace EnergyPlus
             public static string endDay = @"(?'1'.*)(?'day'!-End Day )(?'num'\d)";
             public static string dayschedvals = @"(?'1'.*)(?'comma1',)(?'2'.*)(?'comma2',)";
             public static string dayschedvalslast = @"(?'1'.*)(?'comma1',)(?'2'.*)(?'semi';)";
+            public static string scheduleCompact = "Schedule:Compact,";
+            public static string compactSchType = @"(?'1'.*)(?'schedule'!Schedule Type)";
+            public static string compactThrough = @"(?'1'.*)(?'through'Through:)(?'rest'.*)";
+            public static string compactFor = @"(?'1'.*)(?'for'For:)(?'rest'.*)";
+            public static string compactUntil = @"(?'1'.*)(?'until'Until:)(?'rest'.*)";
 
             //for construction definitions
             public static string ADconstructionDef = @"CONSTRUCTION,";
@@ -277,6 +289,30 @@ namespace EnergyPlus
             public static string ADthermabs = @"(?'1'.*)(?'thermabs'! Thermal Absorptance)";
             public static string ADsolabs = @"(?'1'.*)(?'solabs'! Solar Absorptance)";
             public static string ADvisabs = @"(?'1'.*)(?'visabs'! Visible Absorptance)";
+
+            //zone internal gain definitions
+            public static string people = "PEOPLE,";
+            public static string ADpeopleGroupName = @"(?'1'.*)(?'pgn'! People Group Name)";
+            public static string ADpeopleZoneName = @"(?'1'.*)(?'name'!Zone name)";
+            public static string ADnumPeopleSch = @"(?'1'.*)(?'pnSched'!Number of People Schedule)";
+            public static string ADnumPeople = @"(?'1'.*)(?'numPeop'!Number of People)";
+            public static string ADpeoplePerArea = @"(?'1'.*)(?'peoplePerArea'!- People per Zone Floor Area {person/m2})";
+            public static string ADareaPerPerson = @"(?'1'.*)(?'areaPerPerson'!- Zone Floor Area per Person {m2/person})";
+            public static string ADpeoplefracRadiant = @"(?'1'.*)(?'fracRadiant'!Fraction Radiant)";
+            public static string ADsensibleFrac = @"(?'1'.*)(?'fracSensible'! Sensible fraction)";
+            public static string ADactivityLevelSched = @"(?'1'.*)(?'activityLevelSched'! Activity Level Schedule)";
+            public static string lights = "LIGHTS,";
+            public static string ADintGainName = @"(?'1'.*)(?'name'!-Name)";
+            public static string ADintGainZoneName = @"(?'1'.*)(?'zonename'!-Zone name)";
+            public static string ADSchedule = @"(?'1'.*)(?'schedule'!-Schedule)";
+            public static string ADPower = @"(?'1'.*)(?'lightsPower'!-Design Level)";
+            public static string ADPowerPerArea = @"(?'1'.*)(?'lightsPowerPerArea'!-Watts per Zone Floor Area {W/m2})";
+            public static string ADAreaPerPerson = @"(?'1'.*)(?'lightsAreaPerPerson'!-Watts per Person {W/person})";
+            public static string ADfractionRadiant = @"(?'1'.*)(?'fractionRadiant'!-Fraction Radiant)";
+            public static string ADfractionVisible = @"(?'1'.*)(?'fractionVisible'!-Fraction Visible)";
+            public static string equipment = "ElectricEquipment,";
+            public static string ADfractionLatent = @"(?'1'.*)(?'fractionLatent'!-Fraction Latent)";
+
 
 
         }
@@ -392,6 +428,102 @@ namespace EnergyPlus
                 dayScheds["Custom2"] = null;
 
             }
+        }
+
+        public class Lighting
+        {
+            public enum DesignLevelCalc
+            {
+                LightingLevel
+            }
+
+            public enum LightEndUseKey
+            {
+                GeneralLights
+            }
+
+            public string name { get; set; }
+            public string zoneName { get; set; }
+            public decimal lightPower { get; set; }
+            public decimal lightPowerPerArea { get; set; }
+            public decimal lightPowerPerPerson { get; set; }
+            public decimal lightFractionRadiant { get; set; }
+            public decimal lightFractionVisible { get; set; }
+            public decimal returnAirFraction { get; set; }
+            public string lightSch { get; set; }
+            public LightEndUseKey endUseKey { get; set; }
+            public DesignLevelCalc levelCalc { get; set; }
+
+            public Lighting()
+            {
+                endUseKey = LightEndUseKey.GeneralLights;
+                levelCalc = DesignLevelCalc.LightingLevel;
+            }
+
+        }
+
+        public class Equipment
+        {
+            public string name { get; set; }
+            public string zoneName { get; set; }
+            public decimal equipPower { get; set; }
+            public decimal equipPowerPerArea { get; set; }
+            public decimal equipPowerPerPerson { get; set; }
+            public decimal fractionLatent { get; set; }
+            public decimal fractionRadiant { get; set; }
+            public decimal fractionLost { get; set; }
+            public string equipSch { get; set; }
+
+            public Equipment()
+            {
+
+            }
+        }
+
+        public class People
+        {
+            public enum PeopleNumberCalc
+            {
+                People
+            }
+
+            public string name { get; set; }
+            public string zoneName { get; set; }
+            public decimal numPeople { get; set; }
+            public decimal peoplePerArea { get; set; }
+            public decimal areaPerPerson { get; set; }
+            public string peopleNumSch { get; set; }
+            public string peopleHGSch { get; set; }
+            public decimal fractionRadiant { get; set; }
+            public decimal fractionSensible { get; set; }
+            public PeopleNumberCalc numberCalc { get; set; }
+
+            public People()
+            {
+                numberCalc = PeopleNumberCalc.People;
+            }
+
+        }
+
+        public class Zone
+        {
+            public string name { get; set; }
+            public decimal area { get; set; }
+            public decimal volume { get; set; }
+            public int multiplier { get; set; }
+            public List<ModelingUtilities.BuildingObjects.Surface> spaceSurfaces { get; set; }
+            public List<ModelingUtilities.BuildingObjects.MemorySafe_Surface> msspaceSurfaces { get; set; }
+            public People peopleDef { get; set; }
+            public Equipment equipDef { get; set; }
+            public Lighting lightDef { get; set; }
+
+            public Zone(string aname)
+            {
+                name = aname;
+                spaceSurfaces = new List<ModelingUtilities.BuildingObjects.Surface>();
+                msspaceSurfaces = new List<ModelingUtilities.BuildingObjects.MemorySafe_Surface>();
+            }
+
         }
 
         public class YearWeeks
@@ -3336,16 +3468,22 @@ namespace EnergyPlus
                 //needed regular expressions to build the surface description prior to it being made an object
                 string startSurface = "(?'1'.*)(?'surfaceStart'BuildingSurface:Detailed,)";
                 Regex surfaceYes = new Regex(startSurface);
+                Regex peopleStart = new Regex(EPlusObjects.EPlusRegexString.people);
+                Regex lightStart = new Regex(EPlusObjects.EPlusRegexString.lights);
+                Regex equipStart = new Regex(EPlusObjects.EPlusRegexString.equipment);
                 string semicolon = @"(\S*)(;)(.*)";
                 Regex smicln = new Regex(semicolon);
-
-
-
                 using (StreamReader reader = new StreamReader(idfname))
                 {
                     string line;
                     encoding = reader.CurrentEncoding;
                     bool detailedsurface = false;
+                    bool lightsFound = false;
+                    string lightsname = "";
+                    bool equipFound = false;
+                    string equipname = "";
+                    bool peopleFound = false;
+                    string peoplename = "";
                     //set up the surface
                     ModelingUtilities.BuildingObjects.Surface currentSurface = new ModelingUtilities.BuildingObjects.Surface();
                     currentSurface.SurfaceCoords = new List<Vector.CartCoord>();
@@ -3368,6 +3506,69 @@ namespace EnergyPlus
                             linelist.Add(linecount);
                             logline.Append(linecount.ToString()+Environment.NewLine);
                             continue;
+                        }
+                        Match eplight = lightStart.Match(line);
+                        if (eplight.Success)
+                        {
+                            lightsFound = true;
+                            continue;
+                        }
+                        Match epEquip = equipStart.Match(line);
+                        if (epEquip.Success)
+                        {
+                            equipFound = true;
+                            continue;
+                        }
+                        Match epPeople = peopleStart.Match(line);
+                        if (epPeople.Success)
+                        {
+                            peopleFound = true;
+                            continue;
+                        }
+                        if (lightsFound)
+                        {
+                            Match name = lightStart.Match(line);
+                            if (name.Success)
+                            {
+
+                            }
+                            stuff.Add(line);
+                            output.Append(line);
+                            Match smicolMatch = smicln.Match(line);
+                            if (smicolMatch.Success)
+                            {
+                                lightsFound = false;
+                                //do stuff
+                                stuff.Clear();
+                                output.Clear();
+                            }
+                            
+                        }
+                        if (equipFound)
+                        {
+                            stuff.Add(line);
+                            output.Append(line);
+                            Match smicolMatch = smicln.Match(line);
+                            if (smicolMatch.Success)
+                            {
+                                equipFound = false;
+                                //do stuff
+                                stuff.Clear();
+                                output.Clear();
+                            }
+                        }
+                        if (peopleFound)
+                        {
+                            stuff.Add(line);
+                            output.Append(line);
+                            Match smicolMatch = smicln.Match(line);
+                            if (smicolMatch.Success)
+                            {
+                                peopleFound = false;
+                                //do stuff
+                                stuff.Clear();
+                                output.Clear();
+                            }
                         }
                         //now that a surface element is established in the IDF, we can work through it to create surface objects
                         if (detailedsurface == true)
@@ -3507,6 +3708,919 @@ namespace EnergyPlus
                 Console.WriteLine(e.ToString());
             }
             return memSafeProjectSpaces;
+        }
+
+        public static List<EPlusObjects.Zone> EPlusZonestoObjectList(string idfname)
+        {
+            //find multipliers if they exist by looking for Zone Groups
+            //I set this up to read the idf file twice, once in each try block
+            List<EPlusObjects.Zone> projectSpaces = new List<EPlusObjects.Zone>();
+            List<EPlusObjects.ZoneGroup> zoneGroups = new List<EPlusObjects.ZoneGroup>();
+            List<EPlusObjects.ZoneList> zoneLists = new List<EPlusObjects.ZoneList>();
+            try
+            {
+                //may also want to have 
+                //the zone list and affiliated spaces should come first
+
+                Regex zoneListYes = new Regex(EPlusObjects.EPlusRegexString.startZoneList);
+                Regex zoneGroupYes = new Regex(EPlusObjects.EPlusRegexString.startZoneGroup);
+                Regex zoneGroupNameRegex = new Regex(EPlusObjects.EPlusRegexString.Name);
+                Regex zoneListNameRegex = new Regex(EPlusObjects.EPlusRegexString.zoneListName);
+                Regex zoneListNameMultiplier = new Regex(EPlusObjects.EPlusRegexString.zoneListMultiplier);
+                Regex semicolon = new Regex(EPlusObjects.EPlusRegexString.semicolon);
+
+                Encoding encoding;
+
+                using (StreamReader reader = new StreamReader(idfname))
+                {
+                    string line;
+                    encoding = reader.CurrentEncoding;
+                    bool zoneListBool = false;
+                    bool zoneGroupBool = false;
+                    List<string> zoneListStrings = new List<string>();
+                    List<string> zoneGroupStrings = new List<string>();
+                    while ((line = reader.ReadLine()) != null)
+                    {
+                        Match zoneListFound = zoneListYes.Match(line);
+                        if (zoneListFound.Success)
+                        {
+                            zoneListBool = true;
+                            zoneListStrings.Add(line);
+                            continue;
+                        }
+                        if (zoneListBool)
+                        {
+                            //parse the line to get the name of the zone
+                            Match semiColonMatch = semicolon.Match(line);
+                            if (!semiColonMatch.Success)
+                            {
+                                zoneListStrings.Add(line);
+
+                            }
+                            else
+                            {
+                                zoneListStrings.Add(line);
+                                zoneListBool = false;
+                                EPlusObjects.ZoneList zoneList = EPlusFunctions.MakeZoneList(zoneListStrings);
+                                zoneLists.Add(zoneList);
+                                zoneListStrings.Clear();
+                            }
+                        }
+                        Match zoneGroupFound = zoneGroupYes.Match(line);
+                        if (zoneGroupFound.Success)
+                        {
+                            zoneGroupBool = true;
+                            zoneGroupStrings.Add(line);
+                            continue;
+                        }
+                        if (zoneGroupBool)
+                        {
+                            Match semiColonMatch = semicolon.Match(line);
+                            if (!semiColonMatch.Success)
+                            {
+                                zoneGroupStrings.Add(line);
+                            }
+                            else
+                            {
+                                zoneGroupStrings.Add(line);
+                                zoneGroupBool = false;
+                                EPlusObjects.ZoneGroup zoneGroup = EPlusFunctions.MakeZoneGroup(zoneGroupStrings);
+                                zoneGroups.Add(zoneGroup);
+                                zoneGroupStrings.Clear();
+
+                            }
+                        }
+
+                        //make a zone List object 
+
+                        //find the zone group that is relate to this list
+                    }
+                    reader.Close();
+                }
+
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+            }
+
+            //set up the list of spaces that will be collected
+            
+            //set up the log
+            string linelog = @"C:\Temp\foundEPsurfaceslog.txt";
+            string surfacelog = @"C:\Temp\surfaceCountlog.txt";
+            StringBuilder logline = new StringBuilder();
+            StringBuilder countline = new StringBuilder();
+            try
+            {
+                Encoding encoding;
+                StringBuilder output = new StringBuilder();
+                List<string> stuff = new List<string>();
+
+                //needed regular expressions to build the surface description prior to it being made an object
+                string startSurface = "(?'1'.*)(?'surfaceStart'BuildingSurface:Detailed,)";
+                Regex surfaceYes = new Regex(startSurface);
+                Regex peopleStart = new Regex(EPlusObjects.EPlusRegexString.people);
+                Regex lightStart = new Regex(EPlusObjects.EPlusRegexString.lights);
+                Regex zoneStart = new Regex(EPlusObjects.EPlusRegexString.ADzoneStart);
+                Regex equipStart = new Regex(EPlusObjects.EPlusRegexString.equipment);
+                string semicolon = @"(\S*)(;)(.*)";
+                Regex smicln = new Regex(semicolon);
+                using (StreamReader reader = new StreamReader(idfname))
+                {
+                    string line;
+                    encoding = reader.CurrentEncoding;
+                    bool detailedsurface = false;
+                    bool lightsFound = false;
+                    bool equipFound = false;
+                    bool peopleFound = false;
+                    bool zoneFound = false;
+                    //set up the surface
+                    ModelingUtilities.BuildingObjects.Surface currentSurface = new ModelingUtilities.BuildingObjects.Surface();
+                    currentSurface.SurfaceCoords = new List<Vector.CartCoord>();
+                    currentSurface.surfaceType = ModelingUtilities.BuildingObjects.SurfaceTypes.Blank;
+                    currentSurface.outsideBoundary = ModelingUtilities.BuildingObjects.OutsideBoundary.Blank;
+                    int surfcount = 0;
+                    int linecount = 0;
+                    List<int> linelist = new List<int>();
+                    while ((line = reader.ReadLine()) != null)
+                    {
+                        linecount++;
+                        #region
+                        MatchCollection surfaceStart = surfaceYes.Matches(line);
+                        if (surfaceStart.Count > 0)
+                        {
+                            detailedsurface = true;
+                            currentSurface.Clear();
+                            stuff.Add(line);
+                            output.AppendLine(line);
+                            linelist.Add(linecount);
+                            logline.Append(linecount.ToString() + Environment.NewLine);
+                            continue;
+                        }
+                        Match eplight = lightStart.Match(line);
+                        if (eplight.Success)
+                        {
+                            lightsFound = true;
+                            continue;
+                        }
+                        Match epEquip = equipStart.Match(line);
+                        if (epEquip.Success)
+                        {
+                            equipFound = true;
+                            continue;
+                        }
+                        Match epPeople = peopleStart.Match(line);
+                        if (epPeople.Success)
+                        {
+                            peopleFound = true;
+                            continue;
+                        }
+                        Match zoneM = zoneStart.Match(line);
+                        if (zoneM.Success)
+                        {
+                            zoneFound = true;
+                            continue;
+                        }
+                        if (zoneFound)
+                        {
+                            stuff.Add(line);
+                            output.Append(line);
+                            Match smicolMatch = smicln.Match(line);
+                            if (smicolMatch.Success)
+                            {
+                                zoneFound = false;
+                                //do stuff
+                                EPlusObjects.Zone zoneInst = ADepZoneToObj(stuff);
+                                if (zoneInst.name == "" || zoneInst.name == null)
+                                {
+                                    //this is bad
+                                }
+                                else
+                                {
+                                    string zoneName = zoneInst.name;
+                                    
+                                    if (projectSpaces.Count == 0)
+                                    {
+                                        string tagline = "First project zone detected.";
+                                        //logline.AppendLine(line);
+
+                                        //logline.AppendLine(zoneName + ": " + surfaceName);
+                                        Console.WriteLine(tagline);
+                                        projectSpaces.Add(zoneInst);
+                                    }
+                                    else
+                                    {
+                                        //search for the space name in the existing List of Spaces
+                                        bool spacefound = false;
+                                        for (int i = 0; i < projectSpaces.Count; i++)
+                                        {
+                                            string projname = projectSpaces[i].name;
+                                            if (projname == zoneName)
+                                            {
+                                                string tagline = "Existing project zone detected.";
+                                                //logline.AppendLine(tagline);
+                                                Console.WriteLine(tagline);
+                                                //logline.AppendLine(zoneName + ": " + surfaceName);
+                                                Console.WriteLine(zoneName + ":");
+                                                projectSpaces[i].multiplier = zoneInst.multiplier;
+                                                projectSpaces[i].volume = zoneInst.volume;
+                                                projectSpaces[i].area = zoneInst.area;
+                                                spacefound = true;
+                                                break;
+                                            }
+                                        }
+                                        //if spacefound is never set to true
+                                        if (!spacefound)
+                                        {
+                                            string tagline = "New project zone detected.";
+                                            //logline.AppendLine(tagline);
+                                            Console.WriteLine(tagline);
+                                            //logline.AppendLine(zoneName + ": " + surfaceName);
+                                            Console.WriteLine(zoneName + ": ");
+                                            projectSpaces.Add(zoneInst);
+                                        }
+                                    }
+                                }
+                                stuff.Clear();
+                                output.Clear();
+                            }
+                        }
+                        if (lightsFound)
+                        {
+                            stuff.Add(line);
+                            output.Append(line);
+                            Match smicolMatch = smicln.Match(line);
+                            if (smicolMatch.Success)
+                            {
+                                lightsFound = false;
+                                //do stuff
+                                EPlusObjects.Lighting lightInst = ADeplightToObj(stuff);
+                                //if it returns nothing...vs if it returns something
+                                if (lightInst.name == "" || lightInst.name == null)
+                                {
+                                    //something is wrong
+                                }
+                                else
+                                {
+                                    if (projectSpaces.Count == 0)
+                                    {
+                                        string tagline = "First project zone detected in Surfaces.";
+                                        //logline.AppendLine(line);
+                                        string zoneName = lightInst.zoneName;
+                                        string lightingName = lightInst.name;
+                                        //logline.AppendLine(zoneName + ": " + surfaceName);
+                                        Console.WriteLine(tagline);
+                                        Console.WriteLine(zoneName + ": " + lightingName);
+                                        EPlusObjects.Zone spaceInstance = new EPlusObjects.Zone(zoneName);
+                                        spaceInstance.spaceSurfaces = new List<ModelingUtilities.BuildingObjects.Surface>();
+                                        spaceInstance.name = lightInst.zoneName;
+                                        spaceInstance.lightDef = lightInst;
+                                        projectSpaces.Add(spaceInstance);
+                                    }
+                                    else
+                                    {
+                                        //search for the space name in the existing List of Spaces
+                                        bool spacefound = false;
+                                        for (int i = 0; i < projectSpaces.Count; i++)
+                                        {
+                                            string projname = projectSpaces[i].name;
+                                            if (projname == lightInst.zoneName)
+                                            {
+                                                string tagline = "Existing project zone detected.";
+                                                //logline.AppendLine(tagline);
+                                                Console.WriteLine(tagline);
+                                                string zoneName = lightInst.zoneName;
+                                                string lightName = lightInst.name;
+                                                //logline.AppendLine(zoneName + ": " + surfaceName);
+                                                Console.WriteLine(zoneName + ": " + lightName);
+                                                projectSpaces[i].lightDef = lightInst;
+                                                spacefound = true;
+                                                break;
+                                            }
+                                        }
+                                        //if spacefound is never set to true
+                                        if (!spacefound)
+                                        {
+                                            string tagline = "New project zone detected.";
+                                            //logline.AppendLine(tagline);
+                                            Console.WriteLine(tagline);
+                                            string zoneName = lightInst.zoneName;
+                                            string lightName = lightInst.name;
+                                            //logline.AppendLine(zoneName + ": " + surfaceName);
+                                            Console.WriteLine(zoneName + ": " + lightName);
+                                            EPlusObjects.Zone spaceInstance = new EPlusObjects.Zone(zoneName);
+                                            spaceInstance.spaceSurfaces = new List<ModelingUtilities.BuildingObjects.Surface>();
+                                            spaceInstance.name = lightInst.zoneName;
+                                            spaceInstance.lightDef = lightInst;
+                                            projectSpaces.Add(spaceInstance);
+                                        }
+                                    }
+                                }
+                                stuff.Clear();
+                                output.Clear();
+                            }
+                        }
+                        if (equipFound)
+                        {
+                            stuff.Add(line);
+                            output.Append(line);
+                            Match smicolMatch = smicln.Match(line);
+                            if (smicolMatch.Success)
+                            {
+                                equipFound = false;
+                                //do stuff
+                                EPlusObjects.Equipment equipInst = ADepEquipToObj(stuff);
+                                if (equipInst.name == "" || equipInst.name == null)
+                                {
+                                    //something wrong and don't add
+                                }
+                                else
+                                {
+                                    if (projectSpaces.Count == 0)
+                                    {
+                                        string tagline = "First project zone detected.";
+                                        //logline.AppendLine(line);
+                                        string zoneName = equipInst.zoneName;
+                                        string equipName = equipInst.name;
+                                        //logline.AppendLine(zoneName + ": " + surfaceName);
+                                        Console.WriteLine(tagline);
+                                        Console.WriteLine(zoneName + ": " + equipName);
+                                        EPlusObjects.Zone spaceInstance = new EPlusObjects.Zone(zoneName);
+                                        spaceInstance.spaceSurfaces = new List<ModelingUtilities.BuildingObjects.Surface>();
+                                        spaceInstance.name = equipInst.zoneName;
+                                        spaceInstance.equipDef = equipInst;
+                                        projectSpaces.Add(spaceInstance);
+                                    }
+                                    else
+                                    {
+                                        //search for the space name in the existing List of Spaces
+                                        bool spacefound = false;
+                                        for (int i = 0; i < projectSpaces.Count; i++)
+                                        {
+                                            string projname = projectSpaces[i].name;
+                                            if (projname == equipInst.zoneName)
+                                            {
+                                                string tagline = "Existing project zone detected.";
+                                                //logline.AppendLine(tagline);
+                                                Console.WriteLine(tagline);
+                                                string zoneName = equipInst.zoneName;
+                                                string equipName = equipInst.name;
+                                                //logline.AppendLine(zoneName + ": " + surfaceName);
+                                                Console.WriteLine(zoneName + ": " + equipName);
+                                                projectSpaces[i].equipDef = equipInst;
+                                                spacefound = true;
+                                                break;
+                                            }
+                                        }
+                                        //if spacefound is never set to true
+                                        if (!spacefound)
+                                        {
+                                            string tagline = "New project zone detected.";
+                                            //logline.AppendLine(tagline);
+                                            Console.WriteLine(tagline);
+                                            string zoneName = equipInst.zoneName;
+                                            string equipName = equipInst.name;
+                                            //logline.AppendLine(zoneName + ": " + surfaceName);
+                                            Console.WriteLine(zoneName + ": " + equipName);
+                                            EPlusObjects.Zone spaceInstance = new EPlusObjects.Zone(zoneName);
+                                            spaceInstance.spaceSurfaces = new List<ModelingUtilities.BuildingObjects.Surface>();
+                                            spaceInstance.name = equipInst.zoneName;
+                                            spaceInstance.equipDef = equipInst;
+                                            projectSpaces.Add(spaceInstance);
+                                        }
+                                    }
+                                }
+                                stuff.Clear();
+                                output.Clear();
+                            }
+                        }
+                        if (peopleFound)
+                        {
+                            stuff.Add(line);
+                            output.Append(line);
+                            Match smicolMatch = smicln.Match(line);
+                            if (smicolMatch.Success)
+                            {
+                                peopleFound = false;
+                                //do stuff
+                                EPlusObjects.People peepInst = ADepPeopleToObj(stuff);
+                                if (peepInst.name == "" || peepInst.name == null)
+                                {
+                                    //this should not happen
+                                }
+                                else
+                                {
+                                    string zoneName = peepInst.zoneName;
+                                    string peepName = peepInst.name;
+                                    if (projectSpaces.Count == 0)
+                                    {
+                                        string tagline = "First project zone detected.";
+                                        //logline.AppendLine(line);
+
+                                        //logline.AppendLine(zoneName + ": " + surfaceName);
+                                        Console.WriteLine(tagline);
+                                        Console.WriteLine(zoneName + ": " + peepName);
+                                        EPlusObjects.Zone spaceInstance = new EPlusObjects.Zone(zoneName);
+                                        spaceInstance.spaceSurfaces = new List<ModelingUtilities.BuildingObjects.Surface>();
+                                        spaceInstance.name = zoneName;
+                                        spaceInstance.peopleDef = peepInst;
+                                        projectSpaces.Add(spaceInstance);
+                                    }
+                                    else
+                                    {
+                                        //search for the space name in the existing List of Spaces
+                                        bool spacefound = false;
+                                        for (int i = 0; i < projectSpaces.Count; i++)
+                                        {
+                                            string projname = projectSpaces[i].name;
+                                            if (projname == zoneName)
+                                            {
+                                                string tagline = "Existing project zone detected.";
+                                                //logline.AppendLine(tagline);
+                                                Console.WriteLine(tagline);
+                                                //logline.AppendLine(zoneName + ": " + surfaceName);
+                                                Console.WriteLine(zoneName + ": " + peepName);
+                                                projectSpaces[i].peopleDef = peepInst;
+                                                spacefound = true;
+                                                break;
+                                            }
+                                        }
+                                        //if spacefound is never set to true
+                                        if (!spacefound)
+                                        {
+                                            string tagline = "New project zone detected.";
+                                            //logline.AppendLine(tagline);
+                                            Console.WriteLine(tagline);
+                                            //logline.AppendLine(zoneName + ": " + surfaceName);
+                                            Console.WriteLine(zoneName + ": " + peepName);
+                                            EPlusObjects.Zone spaceInstance = new EPlusObjects.Zone(zoneName);
+                                            spaceInstance.spaceSurfaces = new List<ModelingUtilities.BuildingObjects.Surface>();
+                                            spaceInstance.name = zoneName;
+                                            spaceInstance.peopleDef = peepInst;
+                                            projectSpaces.Add(spaceInstance);
+                                        }
+                                    }
+                                }
+                                stuff.Clear();
+                                output.Clear();
+                            }
+                        }
+                        //now that a surface element is established in the IDF, we can work through it to create surface objects
+                        if (detailedsurface == true)
+                        {
+                            //GetAllDetailedSurfaces
+                            //use streamswriter to make a little text file that will then be turned into an object
+                            //write to the small output stream until you encounter a semi-colon
+                            stuff.Add(line);
+                            output.AppendLine(line);
+                            Match smicolMatch = smicln.Match(line);
+                            if (smicolMatch.Success)
+                            {
+                                detailedsurface = false;
+                                string pass = output.ToString();
+                                //write the output file
+                                //send the output file to a function, returning a surface
+                                ModelingUtilities.BuildingObjects.Surface surfaceReturned = EPlusFunctions.ADEPlusSurfacetoObject(stuff);
+                                //add a multiplier to the surface if needed
+                                foreach (EPlusObjects.ZoneGroup zoneGroup in zoneGroups)
+                                {
+                                    string zoneListName = zoneGroup.zoneListName;
+                                    foreach (EPlusObjects.ZoneList zoneList in zoneLists)
+                                    {
+                                        if (zoneList.name == zoneListName)
+                                        {
+                                            foreach (string zoneName in zoneList.zoneListNames)
+                                            {
+                                                if (surfaceReturned.zoneName == zoneName)
+                                                {
+                                                    //add a multiplier to the surface
+                                                    surfaceReturned.multiplier = zoneGroup.zoneListMultiplier;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                surfcount++;
+                                countline.Append(surfcount.ToString() + Environment.NewLine);
+                                //ModelingUtilities.BuildingObjects.Surface surfaceReturned = EPlusFunctions.EPlusSurfacetoObject("C:\\Temp\\detailedSurface.txt");                                
+                                output.Clear();
+                                stuff.Clear();
+                                if (projectSpaces.Count == 0)
+                                {
+                                    string tagline = "First project zone detected in Surfaces.";
+                                    //logline.AppendLine(line);
+                                    string zoneName = surfaceReturned.zoneName;
+                                    string surfaceName = surfaceReturned.name;
+                                    //logline.AppendLine(zoneName + ": " + surfaceName);
+                                    Console.WriteLine(tagline);
+                                    Console.WriteLine(zoneName + ": " + surfaceName);
+                                    EPlusObjects.Zone spaceInstance = new EPlusObjects.Zone(zoneName);
+                                    spaceInstance.spaceSurfaces = new List<ModelingUtilities.BuildingObjects.Surface>();
+                                    spaceInstance.name = surfaceReturned.zoneName;
+                                    spaceInstance.spaceSurfaces.Add(surfaceReturned);
+                                    projectSpaces.Add(spaceInstance);
+                                }
+                                else
+                                {
+                                    //search for the space name in the existing List of Spaces
+                                    bool spacefound = false;
+                                    for (int i = 0; i < projectSpaces.Count; i++)
+                                    {
+                                        string projname = projectSpaces[i].name;
+                                        if (projname == surfaceReturned.zoneName)
+                                        {
+                                            string tagline = "Existing project zone detected in Surfaces.";
+                                            //logline.AppendLine(tagline);
+                                            Console.WriteLine(tagline);
+                                            string zoneName = surfaceReturned.zoneName;
+                                            string surfaceName = surfaceReturned.name;
+                                            //logline.AppendLine(zoneName + ": " + surfaceName);
+                                            Console.WriteLine(zoneName + ": " + surfaceName);
+                                            projectSpaces[i].spaceSurfaces.Add(surfaceReturned);
+                                            spacefound = true;
+                                            break;
+                                        }
+                                    }
+                                    //if spacefound is never set to true
+                                    if (!spacefound)
+                                    {
+                                        string tagline = "New project zone detected in Surfaces.";
+                                        //logline.AppendLine(tagline);
+                                        Console.WriteLine(tagline);
+                                        string zoneName = surfaceReturned.zoneName;
+                                        string surfaceName = surfaceReturned.name;
+                                        //logline.AppendLine(zoneName + ": " + surfaceName);
+                                        Console.WriteLine(zoneName + ": " + surfaceName);
+                                        EPlusObjects.Zone spaceInstance = new EPlusObjects.Zone(zoneName);
+                                        spaceInstance.spaceSurfaces = new List<ModelingUtilities.BuildingObjects.Surface>();
+                                        spaceInstance.name = surfaceReturned.zoneName;
+                                        spaceInstance.spaceSurfaces.Add(surfaceReturned);
+                                        projectSpaces.Add(spaceInstance);
+                                    }
+
+                                }
+                                //semicolon match = true
+                            }
+                            //detailed surfaces = true
+                        }
+                        //while line reader is reading
+                    }
+                    //convert these spaces to memory safe spaces
+
+                    foreach (EPlusObjects.Zone space in projectSpaces)
+                    {
+                        string zoneName = space.name;
+                        int multiplier = space.multiplier;
+                        foreach (ModelingUtilities.BuildingObjects.Surface surface in space.spaceSurfaces)
+                        {
+                            ModelingUtilities.BuildingObjects.MemorySafe_Surface memsurf = ModelingUtilities.BuildingObjects.convert2MemorySafeSurface(surface);
+                            space.msspaceSurfaces.Add(memsurf);
+                        }
+                        space.spaceSurfaces.Clear(); //now memory safe, don't need anymore
+
+                    }
+                    //streamreader
+                    reader.Close();
+                    using (StreamWriter writer = new StreamWriter(linelog, false, encoding))
+                    {
+                        writer.Write(logline.ToString());
+                    }
+                    using (StreamWriter countwrite = new StreamWriter(surfacelog, false, encoding))
+                    {
+                        countwrite.Write(countline.ToString());
+                    }
+                }
+
+                        #endregion
+
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+            }
+            return projectSpaces;
+        }
+
+        private static EPlusObjects.Zone ADepZoneToObj(List<string> stuff)
+        {
+            Regex zoneName = new Regex(EPlusObjects.EPlusRegexString.ADzoneName);
+            Regex zoneMult = new Regex(EPlusObjects.EPlusRegexString.ADzoneMultiplier);
+            Regex zoneArea = new Regex(EPlusObjects.EPlusRegexString.ADzoneArea);
+            Regex zoneVol = new Regex(EPlusObjects.EPlusRegexString.ADzoneVol);
+
+            EPlusObjects.Zone zoneInst = new EPlusObjects.Zone("tempName");
+            foreach (string line in stuff)
+            {
+                Match nameM = zoneName.Match(line);
+                if (nameM.Success)
+                {
+                    zoneInst.name = Purify(",", nameM.Groups["1"].Value);
+                    continue;
+                }
+                Match multM = zoneMult.Match(line);
+                if (multM.Success)
+                {
+                    zoneInst.multiplier = Convert.ToInt16(Purify(",",multM.Groups["1"].Value));
+                    continue;
+                }
+                Match volM = zoneVol.Match(line);
+                if (volM.Success)
+                {
+                    zoneInst.volume = Convert.ToDecimal(Purify(",", volM.Groups["1"].Value));
+                    continue;
+                }
+                Match areaM = zoneArea.Match(line);
+                if (areaM.Success)
+                {
+                    zoneInst.area = Convert.ToDecimal(Purify(";",areaM.Groups["1"].Value));
+                    continue;
+                }
+            }
+            return zoneInst;
+        }
+
+        private static EPlusObjects.People ADepPeopleToObj(List<string> stuff)
+        {
+            Regex groupName = new Regex(EPlusObjects.EPlusRegexString.ADpeopleGroupName);
+            Regex zoneName = new Regex(EPlusObjects.EPlusRegexString.ADpeopleZoneName);
+            Regex numPeopSch = new Regex(EPlusObjects.EPlusRegexString.ADnumPeopleSch);
+            Regex numPeople = new Regex(EPlusObjects.EPlusRegexString.ADnumPeople);
+            Regex peoplePerArea = new Regex(EPlusObjects.EPlusRegexString.ADpeoplePerArea);
+            Regex areaPerPerson = new Regex(EPlusObjects.EPlusRegexString.ADareaPerPerson);
+            Regex fracRadiant = new Regex(EPlusObjects.EPlusRegexString.ADpeoplefracRadiant);
+            Regex fracSensible = new Regex(EPlusObjects.EPlusRegexString.ADsensibleFrac);
+            Regex activityLevelSched = new Regex(EPlusObjects.EPlusRegexString.ADactivityLevelSched);
+
+            EPlusObjects.People peopleinst = new EPlusObjects.People();
+            foreach (string line in stuff)
+            {
+                Match gnameM = groupName.Match(line);
+                if (gnameM.Success)
+                {
+                    peopleinst.name = Purify(",", gnameM.Groups["1"].Value);
+                    continue;
+                }
+                Match zoneNmM = zoneName.Match(line);
+                if (zoneNmM.Success)
+                {
+                    peopleinst.zoneName = Purify(",", zoneNmM.Groups["1"].Value);
+                    continue;
+                }
+                Match numPeopSchM = numPeopSch.Match(line);
+                if (numPeopSchM.Success)
+                {
+                    if (Purify(",", numPeopSchM.Groups["1"].Value) != "")
+                    {
+                        peopleinst.peopleNumSch = Purify(",", numPeopSchM.Groups["1"].Value);
+                    }
+                    continue;
+                }
+                Match numPeopM = numPeople.Match(line);
+                if (numPeopM.Success)
+                {
+                    if (Purify(",", numPeopM.Groups["1"].Value) != "")
+                    {
+                        peopleinst.numPeople = Convert.ToDecimal(Purify(",", numPeopM.Groups["1"].Value));
+                    }
+                    continue;
+                }
+                Match peopPerAreaM = peoplePerArea.Match(line);
+                if (peopPerAreaM.Success)
+                {
+                    if (Purify(",", peopPerAreaM.Groups["1"].Value) != "")
+                    {
+                        peopleinst.peoplePerArea = Convert.ToDecimal(Purify(",", peopPerAreaM.Groups["1"].Value));
+                    }
+                    continue;
+                }
+                Match areaPerPerM = areaPerPerson.Match(line);
+                if (areaPerPerM.Success)
+                {
+                    if (Purify(",", areaPerPerM.Groups["1"].Value) != "")
+                    {
+                        peopleinst.areaPerPerson = Convert.ToDecimal(Purify(",", areaPerPerM.Groups["1"].Value));
+                    }
+                    continue;
+                }
+                Match fracRadM = fracRadiant.Match(line);
+                if (fracRadM.Success)
+                {
+                    peopleinst.fractionRadiant = Convert.ToDecimal(Purify(",", fracRadM.Groups["1"].Value));
+                    continue;
+                }
+                Match fracSensM = fracSensible.Match(line);
+                if (fracSensM.Success)
+                {
+                    peopleinst.fractionSensible = Convert.ToDecimal(Purify(",", fracSensM.Groups["1"].Value));
+                    continue;
+                }
+                Match actLevel = activityLevelSched.Match(line);
+                if (actLevel.Success)
+                {
+                    peopleinst.peopleHGSch = Purify(";", actLevel.Groups["1"].Value);
+                    continue;
+                }
+            }
+            return peopleinst;
+            
+        }
+
+        private static EPlusObjects.Equipment ADepEquipToObj(List<string> stuff)
+        {
+
+            Regex equipName = new Regex(EPlusObjects.EPlusRegexString.ADintGainName);
+            Regex eZoneName = new Regex(EPlusObjects.EPlusRegexString.ADintGainZoneName);
+            Regex eSched = new Regex(EPlusObjects.EPlusRegexString.ADSchedule);
+            Regex ePower = new Regex(EPlusObjects.EPlusRegexString.ADPower);
+            Regex ePowerPerArea = new Regex(EPlusObjects.EPlusRegexString.ADPowerPerArea);
+            Regex ePowerPerPerson = new Regex(EPlusObjects.EPlusRegexString.ADAreaPerPerson);
+            Regex fractionLatent = new Regex(EPlusObjects.EPlusRegexString.ADfractionLatent);
+            Regex fracRadiant = new Regex(EPlusObjects.EPlusRegexString.ADfractionRadiant);
+
+            EPlusObjects.Equipment einst = new EPlusObjects.Equipment();
+            foreach (string line in stuff)
+            {
+                Match name = equipName.Match(line);
+                if (name.Success)
+                {
+                    einst.name = Purify(",", name.Groups["1"].Value);
+                    continue;
+                }
+                Match zonenm = eZoneName.Match(line);
+                if (zonenm.Success)
+                {
+                    einst.zoneName = Purify(",", zonenm.Groups["1"].Value);
+                    continue;
+                }
+                Match eschedMatch = eSched.Match(line);
+                if (eschedMatch.Success)
+                {
+                    einst.equipSch = Purify(",", eschedMatch.Groups["1"].Value);
+                    continue;
+                }
+                Match ePowerMatch = ePower.Match(line);
+                if (ePowerMatch.Success)
+                {
+                    if (Purify(",", ePowerMatch.Groups["1"].Value) != "")
+                    {
+                        einst.equipPower = Convert.ToDecimal(Purify(",", ePowerMatch.Groups["1"].Value));
+                    }
+                    continue;
+                }
+                Match ePowerPerAreaMatch = ePowerPerArea.Match(line);
+                if (ePowerPerAreaMatch.Success)
+                {
+                    if (Purify(",", ePowerPerAreaMatch.Groups["1"].Value) != "")
+                    {
+                        einst.equipPowerPerArea = Convert.ToDecimal(Purify(",", ePowerPerAreaMatch.Groups["1"].Value));
+                    }
+                    continue;
+                }
+                Match ePerPerson = ePowerPerPerson.Match(line);
+                if (ePerPerson.Success)
+                {
+                    if (Purify(",", ePerPerson.Groups["1"].Value) != "")
+                    {
+                        einst.equipPowerPerPerson = Convert.ToDecimal(Purify(",", ePerPerson.Groups["1"].Value));
+                    }
+                    continue;
+                }
+                Match eFracL = fractionLatent.Match(line);
+                if (eFracL.Success)
+                {
+                    if (Purify(",", eFracL.Groups["1"].Value) != "")
+                    {
+                        einst.fractionLatent = Convert.ToDecimal(Purify(",", eFracL.Groups["1"].Value));
+                    }
+                    continue;
+                }
+                Match efracr = fracRadiant.Match(line);
+                if (efracr.Success)
+                {
+                    if (Purify(",", efracr.Groups["1"].Value) != "")
+                    {
+                        einst.fractionRadiant = Convert.ToDecimal(Purify(",", efracr.Groups["1"].Value));
+                    }
+                    continue;
+                }
+            }
+            return einst;
+        }
+
+        private static EPlusObjects.Lighting ADeplightToObj(List<string> stuff)
+        {
+            //needed regex-es
+            Regex lightsName = new Regex(EPlusObjects.EPlusRegexString.ADintGainName);
+            Regex lightsZone = new Regex(EPlusObjects.EPlusRegexString.ADintGainZoneName);
+            Regex lightsSchedule = new Regex(EPlusObjects.EPlusRegexString.ADSchedule);
+            Regex lightsDesignPower = new Regex(EPlusObjects.EPlusRegexString.ADPower);
+            Regex lightsPowerPerArea = new Regex(EPlusObjects.EPlusRegexString.ADPowerPerArea);
+            Regex lightsAreaPerPerson = new Regex(EPlusObjects.EPlusRegexString.ADAreaPerPerson);
+            Regex lightsFracRadiant = new Regex(EPlusObjects.EPlusRegexString.ADfractionRadiant);
+            Regex lightsFracVis = new Regex(EPlusObjects.EPlusRegexString.ADfractionVisible);
+
+            EPlusObjects.Lighting lightinst = new EPlusObjects.Lighting();
+            foreach (string line in stuff)
+            {
+                Match name = lightsName.Match(line);
+                if (name.Success)
+                {
+                    lightinst.name = Purify(",", name.Groups["1"].Value);
+                    continue;
+                }
+                Match zoneName = lightsZone.Match(line);
+                if (zoneName.Success)
+                {
+                    lightinst.zoneName = Purify(",", zoneName.Groups["1"].Value);
+                    continue;
+                }
+                Match lightSched = lightsSchedule.Match(line);
+                if (lightSched.Success)
+                {
+                    lightinst.lightSch = Purify(",", lightSched.Groups["1"].Value);
+                    continue;
+                }
+                Match lightPow = lightsDesignPower.Match(line);
+                if (lightPow.Success)
+                {
+                    string ret = Purify(",", lightPow.Groups["1"].Value);
+                    if (ret != "")
+                    {
+                        if (ret.ToLower() != "lightinglevel")
+                        {
+                            lightinst.lightPower = Convert.ToDecimal(Purify(",", lightPow.Groups["1"].Value));
+                        }
+                    }
+                    continue;
+                }
+                Match wattPerArea = lightsPowerPerArea.Match(line);
+                if (wattPerArea.Success)
+                {
+                    if (Purify(",", wattPerArea.Groups["1"].Value) != "")
+                    {
+                        lightinst.lightPowerPerArea = Convert.ToDecimal(Purify(",", wattPerArea.Groups["1"].Value));
+                    }
+                    continue;
+                }
+                Match wattPerson = lightsAreaPerPerson.Match(line);
+                if (wattPerson.Success)
+                {
+                    if (Purify(",", wattPerson.Groups["1"].Value) != "")
+                    {
+                        lightinst.lightPowerPerPerson = Convert.ToDecimal(Purify(",", wattPerson.Groups["1"].Value));
+                    }
+                    continue;
+                }
+                Match fracRad = lightsFracRadiant.Match(line);
+                if (fracRad.Success)
+                {
+                    if (Purify(",", fracRad.Groups["1"].Value) != "")
+                    {
+                        lightinst.lightFractionRadiant = Convert.ToDecimal(Purify(",", fracRad.Groups["1"].Value));
+                    }
+                    continue;
+                }
+                Match fracVis = lightsFracVis.Match(line);
+                if (fracVis.Success)
+                {
+                    if (Purify(",", fracVis.Groups["1"].Value) != "")
+                    {
+                        lightinst.lightFractionVisible = Convert.ToDecimal(Purify(",", fracVis.Groups["1"].Value));
+                    }
+                    continue;
+                }
+
+            }
+            return lightinst;
+        }
+
+        private static string Purify(string ending, string line)
+        {
+            string ret = "";
+            if (ending == ",")
+            {
+                string purify = @"(?'ws'\s*)(?'goods'.*)(?'comma',)";
+                Regex purifyRegex = new Regex(purify);
+                Match pure = purifyRegex.Match(line);
+                if (pure.Success)
+                {
+                    ret = pure.Groups["goods"].Value;
+                }
+            }
+            else if (ending == ";")
+            {
+                string purify = @"(?'ws'\s*)(?'goods'.*)(?'semi';)";
+                Regex purifyRegex = new Regex(purify);
+                Match pure = purifyRegex.Match(line);
+                if (pure.Success)
+                {
+                    ret = pure.Groups["goods"].Value;
+                }
+            }
+            return ret;
         }
 
         private static EPlusObjects.ZoneGroup MakeZoneGroup(List<string> zoneGroupStrings)
