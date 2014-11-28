@@ -1102,6 +1102,8 @@ namespace EnergyPlus
             Regex IRReflBack = new Regex(EPlusObjects.EPlusRegexString.ADwindIRemback);
             Regex IRReflFront = new Regex(EPlusObjects.EPlusRegexString.ADwindIRemfront);
             Regex semicolonReg = new Regex(EPlusObjects.EPlusRegexString.semicolon);
+            Regex windowMarker = new Regex(@"(\s*)(! ==============  Windows  ====================== !)"); // new one
+            Regex opaqueMarker = new Regex(@"(\s*)(! ==============                ====================== !)"); //new one
 
             List<EPlusObjects.EPlusGlazingConst> epglazecon = new List<EPlusObjects.EPlusGlazingConst>();
             List<EPlusObjects.EPlusOpaqueConst> epopaque = new List<EPlusObjects.EPlusOpaqueConst>();
@@ -1120,7 +1122,7 @@ namespace EnergyPlus
                 //initialize the values to collect and return
                 bool foundMaterial = false;
                 bool foundConstruction = false;
-                bool foundGlazedConstruction = false;
+                bool foundGlazedConstruction = false; // only used as a flag
                 bool foundGlazingMaterial = false;
                 bool foundGasMaterial = false;
                 int linect = 0;
@@ -1141,6 +1143,16 @@ namespace EnergyPlus
                     {
                         foundConstruction = true;
                         continue;
+                    }
+                    Match windowHeader = windowMarker.Match(line);
+                    if (windowHeader.Success)
+                    {
+                        foundGlazedConstruction = true;
+                    }
+                    Match opaqueHeader = opaqueMarker.Match(line);
+                    if (opaqueHeader.Success)
+                    {
+                        foundGlazedConstruction=false;
                     }
                     Match glazingMaterial = windowMaterialGlazing.Match(line);
                     if (glazingMaterial.Success)
